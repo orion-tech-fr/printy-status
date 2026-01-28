@@ -40,6 +40,20 @@
       font-weight: 600;
     }
 
+    .env-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+      margin-left: 0.5rem;
+    }
+
     .header-row {
       display: flex;
       align-items: center;
@@ -375,7 +389,7 @@
   <div class="container">
     <header>
       <div class="header-row">
-        <h1>Printy Status</h1>
+        <h1>Printy Status <span class="env-badge">PROD</span></h1>
         <div id="summary">Verification...</div>
         <div id="in-progress" style="display: none;"></div>
       </div>
