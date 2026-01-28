@@ -820,7 +820,12 @@
 
       if (totalInProgress > 0) {
         inProgressEl.style.display = 'block';
-        inProgressEl.textContent = `${totalInProgress} en cours`;
+        const deployCount = deployInProgress;
+        const ciCount = ciInProgress;
+        const parts = [];
+        if (deployCount > 0) parts.push(`${deployCount} deploy`);
+        if (ciCount > 0) parts.push(`${ciCount} CI`);
+        inProgressEl.textContent = `${parts.join(' + ')} en cours`;
       } else {
         inProgressEl.style.display = 'none';
       }
