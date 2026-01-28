@@ -156,6 +156,15 @@
       font-family: monospace;
     }
 
+    .service-url-link {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+
+    .service-url-link:hover {
+      text-decoration: underline;
+    }
+
     .status {
       display: flex;
       align-items: center;
@@ -489,7 +498,7 @@
         <div class="service-header">
           <div class="service-info">
             <h2>Database</h2>
-            <div class="service-url">Supabase PostgreSQL</div>
+            <a href="https://supabase.com/dashboard/project/qgmjgdhrlyfzmywvtvee" target="_blank" class="service-url service-url-link">supabase.com/.../qgmjgdhrlyfzmywvtvee</a>
           </div>
           <div class="status checking" id="status-supabase">
             <span class="status-dot"></span>
@@ -497,6 +506,10 @@
           </div>
         </div>
         <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Type</span>
+            <span>Supabase PostgreSQL</span>
+          </div>
           <div class="detail-row">
             <span class="detail-label">Status</span>
             <span id="supabase-status">-</span>
