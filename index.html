@@ -401,6 +401,7 @@
       .services {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
+        width: 100%;
       }
       body {
         overflow-x: hidden;
@@ -409,10 +410,18 @@
         min-height: 100vh;
         padding: 1rem;
         padding-bottom: 2rem;
+        width: 100%;
       }
       .container {
         height: auto;
-        padding-right: 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .service {
+        width: 100%;
+        margin: 0;
       }
       .service-url {
         max-width: calc(100vw - 6rem);
