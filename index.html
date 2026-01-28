@@ -534,7 +534,10 @@
           updateCIStatus('ci-frontend', frontendPipeline);
         }
 
-        return data.success;
+        // Retourne un objet avec le detail des statuts
+        const hasError = data.pipelines.some(p => p.status === 'failure' || p.status === 'error');
+        const inProgress = data.pipelines.filter(p => p.status === 'in_progress' || p.status === 'queued').length;
+        return { ok: !hasError, inProgress };
       } catch (error) {
         // Fallback: marquer comme indisponible
         ['ci-backend', 'ci-frontend'].forEach(id => {
@@ -546,7 +549,7 @@
           workflowEl.textContent = 'API indisponible';
           commitEl.textContent = '-';
         });
-        return true; // Ne pas compter comme erreur critique
+        return { ok: true, inProgress: 0 }; // Ne pas compter comme erreur critique
       }
     }
 
@@ -638,18 +641,29 @@
       // Check Supabase (depends on API status)
       const supabaseResult = await checkSupabase();
 
-      allResults = [...httpResults, ciResult, supabaseResult];
-
-      const allOnline = allResults.every(r => r);
+      // Calculer le résumé
       const summaryEl = document.getElementById('summary');
+      const httpOk = httpResults.filter(r => r).length;
+      const httpErrors = httpResults.filter(r => !r).length;
+      const dbOk = supabaseResult ? 1 : 0;
+      const dbErrors = supabaseResult ? 0 : 1;
+      const ciOk = ciResult.ok ? 2 : 0;
+      const ciErrors = ciResult.ok ? 0 : (2 - ciResult.inProgress);
+      const ciInProgress = ciResult.inProgress || 0;
 
-      if (allOnline) {
+      const totalOk = httpOk + dbOk + ciOk - ciInProgress;
+      const totalErrors = httpErrors + dbErrors + ciErrors;
+      const totalInProgress = ciInProgress;
+
+      if (totalErrors > 0) {
+        summaryEl.className = 'has-issues';
+        summaryEl.textContent = `${totalErrors} erreur(s)`;
+      } else if (totalInProgress > 0) {
+        summaryEl.className = '';
+        summaryEl.textContent = `${totalOk} OK, ${totalInProgress} en cours`;
+      } else {
         summaryEl.className = '';
         summaryEl.textContent = 'Tous OK';
-      } else {
-        summaryEl.className = 'has-issues';
-        const downCount = allResults.filter(r => !r).length;
-        summaryEl.textContent = `${downCount} erreur(s)`;
       }
 
       document.getElementById('last-check').textContent =
