@@ -402,6 +402,21 @@
       }
     }
 
+    /* Mobile paysage (horizontal) */
+    @media (max-height: 500px) and (orientation: landscape) {
+      body {
+        overflow-y: auto;
+      }
+      .container {
+        min-height: auto;
+        height: auto;
+      }
+      .services {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto;
+      }
+    }
+
     /* Mobile */
     @media (max-width: 600px) {
       body {
