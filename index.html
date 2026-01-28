@@ -296,7 +296,7 @@
     }
 
     .job-name.success {
-      color: #86efac;
+      color: #22c55e;
     }
 
     .job-name.failure {
@@ -624,8 +624,12 @@
             <span id="supabase-schema">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Migration</span>
+            <span class="detail-label">Dernière migration</span>
             <span id="supabase-migration">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date migration</span>
+            <span id="supabase-migration-date">-</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Tables</span>
@@ -1035,7 +1039,7 @@
         if (response.ok && data.success) {
           statusEl.className = 'status online';
           statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
-          statusTextEl.textContent = 'Connectee';
+          statusTextEl.textContent = 'Connectée';
           responseTimeEl.textContent = data.responseTime || '-';
 
           // Recuperer les infos de schema
@@ -1047,18 +1051,24 @@
                 const schema = schemaData.schema;
                 schemaEl.textContent = schema.strategy === 'migrations' ? 'Migrations' : 'DB Push';
 
+                const migrationDateEl = document.getElementById('supabase-migration-date');
                 if (schema.lastMigration) {
                   const migDate = new Date(schema.lastMigration.appliedAt);
-                  migrationEl.textContent = migDate.toLocaleString('fr-FR', {
+                  const migDateStr = migDate.toLocaleString('fr-FR', {
                     day: '2-digit',
                     month: '2-digit',
                     year: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
                   });
+                  // Extraire le nom court de la migration (enlever le timestamp)
+                  const migName = schema.lastMigration.name.replace(/^\d+_/, '').replace(/_/g, ' ');
+                  migrationEl.innerHTML = `<span style="color: #a78bfa">${migName}</span>`;
                   migrationEl.title = schema.lastMigration.name;
+                  migrationDateEl.textContent = migDateStr;
                 } else {
                   migrationEl.textContent = 'N/A';
+                  migrationDateEl.textContent = '-';
                 }
 
                 if (schema.tables) {
