@@ -100,6 +100,11 @@
       color: #a78bfa;
     }
 
+    .uptime-value {
+      font-family: monospace;
+      color: #3b82f6;
+    }
+
     .services {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -373,10 +378,6 @@
         <h1>Printy Status</h1>
         <div id="summary">Verification...</div>
         <div id="in-progress" style="display: none;"></div>
-        <div id="uptime" class="uptime hidden">
-          <span class="uptime-icon">⏱</span>
-          <span id="uptime-value">00:00:00</span>
-        </div>
       </div>
     </header>
 
@@ -405,6 +406,14 @@
           <div class="detail-row">
             <span class="detail-label">Deploy</span>
             <span id="api-deploy-status">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date</span>
+            <span class="detail-value" id="api-deploy-date">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Uptime</span>
+            <span class="detail-value uptime-value" id="api-uptime">-</span>
           </div>
           <div id="api-error-box" class="error-box hidden">
             <div class="error-message" id="api-error-message"></div>
@@ -441,6 +450,14 @@
             <span class="detail-label">Deploy</span>
             <span id="frontend-deploy-status">-</span>
           </div>
+          <div class="detail-row">
+            <span class="detail-label">Date</span>
+            <span class="detail-value" id="frontend-deploy-date">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Uptime</span>
+            <span class="detail-value uptime-value" id="frontend-uptime">-</span>
+          </div>
           <div id="frontend-error-box" class="error-box hidden">
             <div class="error-message" id="frontend-error-message"></div>
           </div>
@@ -471,6 +488,18 @@
           <div class="detail-row">
             <span class="detail-label">Reponse</span>
             <span id="supabase-response-time">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Schema</span>
+            <span id="supabase-schema">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Migration</span>
+            <span id="supabase-migration">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Tables</span>
+            <span id="supabase-tables">-</span>
           </div>
           <div id="supabase-error-box" class="error-box hidden">
             <div class="error-message" id="supabase-error-message"></div>
@@ -580,8 +609,11 @@
     let autoRefreshInterval = null;
     let allResults = [];
 
-    // Uptime depuis dernier deploy reussi
-    let lastDeployTime = null;
+    // Uptime depuis dernier deploy reussi (backend et frontend)
+    const deployTimes = {
+      api: null,
+      frontend: null,
+    };
     let uptimeInterval = null;
 
     function formatUptime(ms) {
@@ -595,23 +627,47 @@
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    function updateUptimeDisplay() {
-      if (!lastDeployTime) return;
-      const elapsed = Date.now() - lastDeployTime;
-      document.getElementById('uptime-value').textContent = formatUptime(elapsed);
+    function formatDeployDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
 
-    function setLastDeployTime(deployDate) {
+    function updateUptimeDisplays() {
+      ['api', 'frontend'].forEach(id => {
+        const deployTime = deployTimes[id];
+        const uptimeEl = document.getElementById(`${id}-uptime`);
+        if (deployTime && uptimeEl) {
+          const elapsed = Date.now() - deployTime;
+          uptimeEl.textContent = formatUptime(elapsed);
+        }
+      });
+    }
+
+    function setDeployTime(id, deployDate) {
+      const uptimeEl = document.getElementById(`${id}-uptime`);
+      const dateEl = document.getElementById(`${id}-deploy-date`);
+
       if (!deployDate) {
-        document.getElementById('uptime').classList.add('hidden');
+        if (uptimeEl) uptimeEl.textContent = '-';
+        if (dateEl) dateEl.textContent = '-';
+        deployTimes[id] = null;
         return;
       }
-      lastDeployTime = new Date(deployDate).getTime();
-      document.getElementById('uptime').classList.remove('hidden');
-      updateUptimeDisplay();
+
+      deployTimes[id] = new Date(deployDate).getTime();
+      if (dateEl) dateEl.textContent = formatDeployDate(deployDate);
+      updateUptimeDisplays();
+
       // Demarrer l'interval si pas deja en cours
       if (!uptimeInterval) {
-        uptimeInterval = setInterval(updateUptimeDisplay, 1000);
+        uptimeInterval = setInterval(updateUptimeDisplays, 1000);
       }
     }
 
@@ -822,6 +878,9 @@
       const statusEl = document.getElementById('status-supabase');
       const statusTextEl = document.getElementById('supabase-status');
       const responseTimeEl = document.getElementById('supabase-response-time');
+      const schemaEl = document.getElementById('supabase-schema');
+      const migrationEl = document.getElementById('supabase-migration');
+      const tablesEl = document.getElementById('supabase-tables');
       const errorBox = document.getElementById('supabase-error-box');
       const errorMessage = document.getElementById('supabase-error-message');
 
@@ -847,12 +906,54 @@
           statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
           statusTextEl.textContent = 'Connectee';
           responseTimeEl.textContent = data.responseTime || '-';
+
+          // Recuperer les infos de schema
+          try {
+            const schemaResponse = await fetch('https://printy-api-0te4.onrender.com/api/health/db/schema');
+            if (schemaResponse.ok) {
+              const schemaData = await schemaResponse.json();
+              if (schemaData.success && schemaData.schema) {
+                const schema = schemaData.schema;
+                schemaEl.textContent = schema.strategy === 'migrations' ? 'Migrations' : 'DB Push';
+
+                if (schema.lastMigration) {
+                  const migDate = new Date(schema.lastMigration.appliedAt);
+                  migrationEl.textContent = migDate.toLocaleString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+                  migrationEl.title = schema.lastMigration.name;
+                } else {
+                  migrationEl.textContent = 'N/A';
+                }
+
+                if (schema.tables) {
+                  const tableCounts = Object.entries(schema.tables)
+                    .map(([name, count]) => `${count}`)
+                    .join(' / ');
+                  tablesEl.textContent = tableCounts;
+                  tablesEl.title = Object.entries(schema.tables)
+                    .map(([name, count]) => `${name}: ${count}`)
+                    .join(', ');
+                }
+              }
+            }
+          } catch {
+            // Ignorer les erreurs de schema
+          }
+
           return true;
         } else {
           statusEl.className = 'status offline';
           statusEl.innerHTML = '<span class="status-dot"></span><span>Down</span>';
           statusTextEl.textContent = 'Deconnectee';
           responseTimeEl.textContent = '-';
+          schemaEl.textContent = '-';
+          migrationEl.textContent = '-';
+          tablesEl.textContent = '-';
           errorMessage.textContent = data.error || 'Connexion DB echouee';
           errorBox.classList.remove('hidden');
           return false;
@@ -862,6 +963,9 @@
         statusEl.innerHTML = '<span class="status-dot"></span><span>?</span>';
         statusTextEl.textContent = 'Non verifiable';
         responseTimeEl.textContent = '-';
+        schemaEl.textContent = '-';
+        migrationEl.textContent = '-';
+        tablesEl.textContent = '-';
         errorMessage.textContent = error.name === 'AbortError' ? 'Timeout' : 'API inaccessible';
         errorBox.classList.remove('hidden');
         return false;
@@ -915,7 +1019,13 @@
         const inProgress = ['building', 'deploying', 'pending'].includes(status);
         const isFailed = ['failed', 'error'].includes(status);
 
-        return { status, inProgress, isFailed, finishedAt: deploy.finishedAt };
+        return {
+          status,
+          inProgress,
+          isFailed,
+          finishedAt: deploy.finishedAt || deploy.readyAt,
+          readyAt: deploy.readyAt,
+        };
       } catch (error) {
         deployStatusEl.textContent = 'N/A';
         deployStatusEl.style.color = '#64748b';
@@ -983,9 +1093,19 @@
         inProgressEl.style.display = 'none';
       }
 
-      // Mettre a jour le chrono depuis le dernier deploy backend reussi
+      // Mettre a jour le chrono depuis le dernier deploy reussi (backend et frontend)
       if (backendDeployResult.finishedAt && backendDeployResult.status === 'success') {
-        setLastDeployTime(backendDeployResult.finishedAt);
+        setDeployTime('api', backendDeployResult.finishedAt);
+      } else {
+        setDeployTime('api', null);
+      }
+
+      if (frontendDeployResult.finishedAt && frontendDeployResult.status === 'success') {
+        setDeployTime('frontend', frontendDeployResult.finishedAt);
+      } else if (frontendDeployResult.readyAt && frontendDeployResult.status === 'success') {
+        setDeployTime('frontend', frontendDeployResult.readyAt);
+      } else {
+        setDeployTime('frontend', null);
       }
 
       document.getElementById('last-check').textContent =
