@@ -165,6 +165,15 @@
 
     .detail-label {
       color: #64748b;
+      flex-shrink: 0;
+    }
+
+    .detail-row span:last-child {
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 70%;
     }
 
     .error-box {
@@ -373,11 +382,11 @@
         </div>
       </div>
 
-      <!-- CI Backend -->
+      <!-- CI/CD Backend -->
       <div class="service" id="service-ci-backend">
         <div class="service-header">
           <div class="service-info">
-            <h2>CI Backend</h2>
+            <h2>CI/CD Backend</h2>
             <div class="service-url">GitHub Actions</div>
           </div>
           <div class="status checking" id="status-ci-backend">
@@ -403,11 +412,11 @@
         </div>
       </div>
 
-      <!-- CI Frontend -->
+      <!-- CI/CD Frontend -->
       <div class="service" id="service-ci-frontend">
         <div class="service-header">
           <div class="service-info">
-            <h2>CI Frontend</h2>
+            <h2>CI/CD Frontend</h2>
             <div class="service-url">GitHub Actions</div>
           </div>
           <div class="status checking" id="status-ci-frontend">
@@ -578,7 +587,8 @@
 
       errorBox.classList.add('hidden');
       workflowEl.textContent = pipeline.workflow || 'CI';
-      commitEl.textContent = pipeline.commit ? pipeline.commit.substring(0, 20) + '...' : '-';
+      commitEl.textContent = pipeline.commit || '-';
+      commitEl.title = pipeline.commit || '';
 
       if (pipeline.status === 'success') {
         statusEl.className = 'status online';
