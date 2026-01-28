@@ -385,6 +385,7 @@
       </div>
 
       <!-- Frontend -->
+      <div class="service" id="service-frontend">
         <div class="service-header">
           <div class="service-info">
             <h2>Frontend</h2>
@@ -551,7 +552,10 @@
           { headers: { 'Accept': 'application/vnd.github.v3+json' } }
         );
 
-        if (!response.ok) throw new Error('GitHub API error');
+        if (!response.ok) {
+          if (response.status === 403) throw new Error('Rate limit GitHub atteint');
+          throw new Error(`GitHub API error: ${response.status}`);
+        }
 
         const data = await response.json();
         const run = data.workflow_runs[0];
@@ -585,10 +589,12 @@
           return true;
         }
       } catch (error) {
-        statusEl.className = 'status offline';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Erreur</span>';
-        workflowEl.textContent = 'Erreur API';
-        return false;
+        statusEl.className = 'status checking';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>N/A</span>';
+        workflowEl.textContent = 'API GitHub indisponible (rate limit?)';
+        commitEl.textContent = '-';
+        // Ne pas compter comme erreur si c'est juste l'API GitHub qui rate limit
+        return true;
       }
     }
 
