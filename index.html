@@ -215,9 +215,26 @@
     .job-icon.in_progress { color: #f59e0b; }
     .job-icon.queued { color: #64748b; }
     .job-icon.skipped { color: #64748b; }
+    .job-icon.pending { color: #475569; }
 
     .job-name {
       color: #94a3b8;
+    }
+
+    .job-name.pending {
+      color: #475569;
+    }
+
+    .job-name.success {
+      color: #86efac;
+    }
+
+    .job-name.failure {
+      color: #fca5a5;
+    }
+
+    .job-name.in_progress {
+      color: #fcd34d;
     }
 
     .error-box {
@@ -620,6 +637,12 @@
       }
     }
 
+    // Jobs attendus par pipeline
+    const expectedJobs = {
+      'ci-backend': ['unit-tests', 'integration-tests', 'build', 'security', 'deploy'],
+      'ci-frontend': ['unit-tests', 'build', 'security', 'deploy'],
+    };
+
     function updateCIStatus(id, pipeline) {
       const statusEl = document.getElementById(`status-${id}`);
       const commitEl = document.getElementById(`${id}-commit`);
@@ -631,26 +654,51 @@
       commitEl.textContent = pipeline.commit || '-';
       commitEl.title = pipeline.commit || '';
 
-      // Afficher les jobs/étapes
-      if (pipeline.jobs && pipeline.jobs.length > 0) {
-        const jobsHtml = pipeline.jobs.map(job => {
-          const icons = {
-            success: '✓',
-            failure: '✗',
-            in_progress: '⏳',
-            queued: '○',
-            skipped: '⊘',
-          };
-          const icon = icons[job.status] || '○';
-          return `<div class="job-item">
-            <span class="job-icon ${job.status}">${icon}</span>
-            <span class="job-name">${job.name}</span>
-          </div>`;
-        }).join('');
-        jobsEl.innerHTML = jobsHtml;
-      } else {
-        jobsEl.innerHTML = '';
+      // Construire la map des jobs reçus
+      const jobStatusMap = {};
+      if (pipeline.jobs) {
+        pipeline.jobs.forEach(job => {
+          jobStatusMap[job.name] = job.status;
+        });
       }
+
+      // Afficher tous les jobs attendus avec leur état
+      const expected = expectedJobs[id] || [];
+      let foundInProgress = false;
+
+      const jobsHtml = expected.map(jobName => {
+        const status = jobStatusMap[jobName];
+        let icon, statusClass;
+
+        if (status === 'success') {
+          icon = '✓';
+          statusClass = 'success';
+        } else if (status === 'failure') {
+          icon = '✗';
+          statusClass = 'failure';
+        } else if (status === 'in_progress') {
+          icon = '⏳';
+          statusClass = 'in_progress';
+          foundInProgress = true;
+        } else if (status === 'queued') {
+          icon = '○';
+          statusClass = 'queued';
+        } else if (status === 'skipped') {
+          icon = '⊘';
+          statusClass = 'skipped';
+        } else {
+          // Pas encore traité (pending)
+          icon = '○';
+          statusClass = foundInProgress || !status ? 'pending' : 'queued';
+        }
+
+        return `<div class="job-item">
+          <span class="job-icon ${statusClass}">${icon}</span>
+          <span class="job-name ${statusClass}">${jobName}</span>
+        </div>`;
+      }).join('');
+
+      jobsEl.innerHTML = jobsHtml;
 
       if (pipeline.status === 'success') {
         statusEl.className = 'status online';
