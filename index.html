@@ -176,6 +176,37 @@
       line-height: 1.3;
     }
 
+    .jobs-list {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .job-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      padding: 0.2rem 0;
+    }
+
+    .job-icon {
+      font-size: 0.75rem;
+      width: 16px;
+      text-align: center;
+    }
+
+    .job-icon.success { color: #22c55e; }
+    .job-icon.failure { color: #ef4444; }
+    .job-icon.in_progress { color: #f59e0b; }
+    .job-icon.queued { color: #64748b; }
+    .job-icon.skipped { color: #64748b; }
+
+    .job-name {
+      color: #94a3b8;
+    }
+
     .error-box {
       margin-top: 0.5rem;
       padding: 0.5rem;
@@ -396,13 +427,10 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Workflow</span>
-            <span class="detail-value" id="ci-backend-workflow">-</span>
-          </div>
-          <div class="detail-row">
             <span class="detail-label">Commit</span>
             <span class="detail-value" id="ci-backend-commit">-</span>
           </div>
+          <div class="jobs-list" id="ci-backend-jobs"></div>
           <div id="ci-backend-error-box" class="error-box hidden">
             <div class="error-message" id="ci-backend-error-message"></div>
           </div>
@@ -426,13 +454,10 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Workflow</span>
-            <span class="detail-value" id="ci-frontend-workflow">-</span>
-          </div>
-          <div class="detail-row">
             <span class="detail-label">Commit</span>
             <span class="detail-value" id="ci-frontend-commit">-</span>
           </div>
+          <div class="jobs-list" id="ci-frontend-jobs"></div>
           <div id="ci-frontend-error-box" class="error-box hidden">
             <div class="error-message" id="ci-frontend-error-message"></div>
           </div>
@@ -580,15 +605,35 @@
 
     function updateCIStatus(id, pipeline) {
       const statusEl = document.getElementById(`status-${id}`);
-      const workflowEl = document.getElementById(`${id}-workflow`);
       const commitEl = document.getElementById(`${id}-commit`);
+      const jobsEl = document.getElementById(`${id}-jobs`);
       const errorBox = document.getElementById(`${id}-error-box`);
       const errorMessage = document.getElementById(`${id}-error-message`);
 
       errorBox.classList.add('hidden');
-      workflowEl.textContent = pipeline.workflow || 'CI';
       commitEl.textContent = pipeline.commit || '-';
       commitEl.title = pipeline.commit || '';
+
+      // Afficher les jobs/étapes
+      if (pipeline.jobs && pipeline.jobs.length > 0) {
+        const jobsHtml = pipeline.jobs.map(job => {
+          const icons = {
+            success: '✓',
+            failure: '✗',
+            in_progress: '⏳',
+            queued: '○',
+            skipped: '⊘',
+          };
+          const icon = icons[job.status] || '○';
+          return `<div class="job-item">
+            <span class="job-icon ${job.status}">${icon}</span>
+            <span class="job-name">${job.name}</span>
+          </div>`;
+        }).join('');
+        jobsEl.innerHTML = jobsHtml;
+      } else {
+        jobsEl.innerHTML = '';
+      }
 
       if (pipeline.status === 'success') {
         statusEl.className = 'status online';
