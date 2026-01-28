@@ -671,9 +671,12 @@
       if (totalErrors > 0) {
         summaryEl.className = 'has-issues';
         summaryEl.textContent = `${totalErrors} erreur(s)`;
-      } else {
+      } else if (totalInProgress > 0) {
         summaryEl.className = '';
         summaryEl.textContent = `${totalOk} OK`;
+      } else {
+        summaryEl.className = '';
+        summaryEl.textContent = 'Tous OK';
       }
 
       if (totalInProgress > 0) {
