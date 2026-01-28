@@ -15,58 +15,85 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f172a;
       color: #e2e8f0;
-      min-height: 100vh;
-      padding: 2rem;
+      height: 100vh;
+      padding: 1rem;
+      overflow: hidden;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 900px;
       margin: 0 auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 0.75rem;
+      flex-shrink: 0;
     }
 
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
     }
 
-    .subtitle {
-      color: #64748b;
-      font-size: 0.875rem;
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    #summary {
+      padding: 0.4rem 1rem;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 6px;
+      color: #22c55e;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    #summary.has-issues {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
     }
 
     .services {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      flex: 1;
+      min-height: 0;
     }
 
     .service {
       background: #1e293b;
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 8px;
+      padding: 0.75rem;
       border: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
     }
 
     .service-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
     }
 
     .service-info h2 {
-      font-size: 1rem;
-      font-weight: 500;
-      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
     }
 
     .service-url {
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       color: #64748b;
       font-family: monospace;
     }
@@ -74,32 +101,33 @@
     .status {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
+      gap: 0.35rem;
+      font-size: 0.7rem;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     .status-dot {
-      width: 12px;
-      height: 12px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      animation: pulse 2s infinite;
+      flex-shrink: 0;
     }
 
     .status.online .status-dot {
       background: #22c55e;
-      box-shadow: 0 0 8px #22c55e;
+      box-shadow: 0 0 6px #22c55e;
     }
 
     .status.offline .status-dot {
       background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
-      animation: none;
+      box-shadow: 0 0 6px #ef4444;
     }
 
     .status.checking .status-dot {
       background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
+      box-shadow: 0 0 6px #f59e0b;
+      animation: pulse 2s infinite;
     }
 
     .status.online { color: #22c55e; }
@@ -112,17 +140,15 @@
     }
 
     .service-details {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #334155;
-      font-size: 0.8rem;
+      flex: 1;
+      font-size: 0.7rem;
+      color: #94a3b8;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
-      color: #94a3b8;
+      margin-bottom: 0.25rem;
     }
 
     .detail-label {
@@ -130,18 +156,12 @@
     }
 
     .error-box {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
+      margin-top: 0.5rem;
+      padding: 0.4rem;
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 6px;
-      font-size: 0.8rem;
-    }
-
-    .error-title {
-      color: #ef4444;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
     }
 
     .error-message {
@@ -151,18 +171,17 @@
     }
 
     .action-links {
-      margin-top: 0.75rem;
+      margin-top: auto;
+      padding-top: 0.5rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .action-link {
       color: #3b82f6;
       text-decoration: none;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
+      font-size: 0.65rem;
     }
 
     .action-link:hover {
@@ -170,27 +189,27 @@
     }
 
     .footer {
-      text-align: center;
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding-top: 0.75rem;
+      flex-shrink: 0;
     }
 
     .last-check {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #64748b;
-      margin-bottom: 0.5rem;
     }
 
     .refresh-btn {
       background: #3b82f6;
       color: white;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
     .refresh-btn:hover {
@@ -202,30 +221,11 @@
       cursor: not-allowed;
     }
 
-    .all-systems {
-      text-align: center;
-      padding: 1rem;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      color: #22c55e;
-      font-weight: 500;
-    }
-
-    .all-systems.has-issues {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-    }
-
     .auto-refresh {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      font-size: 0.75rem;
+      gap: 0.35rem;
+      font-size: 0.7rem;
       color: #64748b;
     }
 
@@ -236,18 +236,33 @@
     .hidden {
       display: none;
     }
+
+    @media (max-width: 700px) {
+      .services {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .services {
+        grid-template-columns: 1fr;
+      }
+      body {
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Printy Status</h1>
-      <p class="subtitle">Etat des services en temps reel</p>
+      <div class="header-row">
+        <h1>Printy Status</h1>
+        <div id="summary">Verification...</div>
+      </div>
     </header>
-
-    <div id="summary" class="all-systems">
-      Verification en cours...
-    </div>
 
     <div class="services" id="services">
       <!-- API Backend -->
@@ -259,128 +274,25 @@
           </div>
           <div class="status checking" id="status-api">
             <span class="status-dot"></span>
-            <span>Verification...</span>
+            <span>...</span>
           </div>
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Temps de reponse</span>
+            <span class="detail-label">Reponse</span>
             <span id="api-response-time">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">HTTP Status</span>
+            <span class="detail-label">HTTP</span>
             <span id="api-http-status">-</span>
           </div>
           <div id="api-error-box" class="error-box hidden">
-            <div class="error-title">Erreur detectee</div>
             <div class="error-message" id="api-error-message"></div>
           </div>
-          <div id="api-actions" class="action-links hidden">
-            <a href="https://dashboard.render.com" target="_blank" class="action-link">
-              Render Dashboard
-            </a>
-            <a href="https://github.com/orion-tech-fr/projet-a-backend/actions" target="_blank" class="action-link">
-              GitHub Actions
-            </a>
-          </div>
         </div>
-      </div>
-
-      <!-- CI Backend -->
-      <div class="service" id="service-ci-backend">
-        <div class="service-header">
-          <div class="service-info">
-            <h2>CI Backend</h2>
-            <div class="service-url">GitHub Actions</div>
-          </div>
-          <div class="status checking" id="status-ci-backend">
-            <span class="status-dot"></span>
-            <span>Verification...</span>
-          </div>
-        </div>
-        <div class="service-details">
-          <div class="detail-row">
-            <span class="detail-label">Dernier workflow</span>
-            <span id="ci-backend-workflow">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Commit</span>
-            <span id="ci-backend-commit">-</span>
-          </div>
-          <div id="ci-backend-error-box" class="error-box hidden">
-            <div class="error-title">Pipeline en echec</div>
-            <div class="error-message" id="ci-backend-error-message"></div>
-          </div>
-          <div id="ci-backend-actions" class="action-links">
-            <a href="https://github.com/orion-tech-fr/projet-a-backend/actions" target="_blank" class="action-link">
-              Voir les logs
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- CI Frontend -->
-      <div class="service" id="service-ci-frontend">
-        <div class="service-header">
-          <div class="service-info">
-            <h2>CI Frontend</h2>
-            <div class="service-url">GitHub Actions</div>
-          </div>
-          <div class="status checking" id="status-ci-frontend">
-            <span class="status-dot"></span>
-            <span>Verification...</span>
-          </div>
-        </div>
-        <div class="service-details">
-          <div class="detail-row">
-            <span class="detail-label">Dernier workflow</span>
-            <span id="ci-frontend-workflow">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Commit</span>
-            <span id="ci-frontend-commit">-</span>
-          </div>
-          <div id="ci-frontend-error-box" class="error-box hidden">
-            <div class="error-title">Pipeline en echec</div>
-            <div class="error-message" id="ci-frontend-error-message"></div>
-          </div>
-          <div id="ci-frontend-actions" class="action-links">
-            <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">
-              Voir les logs
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Supabase -->
-      <div class="service" id="service-supabase">
-        <div class="service-header">
-          <div class="service-info">
-            <h2>Base de donnees</h2>
-            <div class="service-url">Supabase PostgreSQL</div>
-          </div>
-          <div class="status checking" id="status-supabase">
-            <span class="status-dot"></span>
-            <span>Verification...</span>
-          </div>
-        </div>
-        <div class="service-details">
-          <div class="detail-row">
-            <span class="detail-label">Status</span>
-            <span id="supabase-status">-</span>
-          </div>
-          <div id="supabase-error-box" class="error-box hidden">
-            <div class="error-title">Probleme detecte</div>
-            <div class="error-message" id="supabase-error-message"></div>
-          </div>
-          <div id="supabase-actions" class="action-links">
-            <a href="https://status.supabase.com/" target="_blank" class="action-link">
-              Supabase Status
-            </a>
-            <a href="https://supabase.com/dashboard" target="_blank" class="action-link">
-              Dashboard
-            </a>
-          </div>
+        <div id="api-actions" class="action-links">
+          <a href="https://dashboard.render.com" target="_blank" class="action-link">Render</a>
+          <a href="https://github.com/orion-tech-fr/projet-a-backend/actions" target="_blank" class="action-link">Actions</a>
         </div>
       </div>
 
@@ -393,42 +305,122 @@
           </div>
           <div class="status checking" id="status-frontend">
             <span class="status-dot"></span>
-            <span>Verification...</span>
+            <span>...</span>
           </div>
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Temps de reponse</span>
+            <span class="detail-label">Reponse</span>
             <span id="frontend-response-time">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">HTTP Status</span>
+            <span class="detail-label">HTTP</span>
             <span id="frontend-http-status">-</span>
           </div>
           <div id="frontend-error-box" class="error-box hidden">
-            <div class="error-title">Erreur detectee</div>
             <div class="error-message" id="frontend-error-message"></div>
           </div>
-          <div id="frontend-actions" class="action-links hidden">
-            <a href="https://vercel.com/dashboard" target="_blank" class="action-link">
-              Vercel Dashboard
-            </a>
-            <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">
-              GitHub Actions
-            </a>
+        </div>
+        <div id="frontend-actions" class="action-links">
+          <a href="https://vercel.com/dashboard" target="_blank" class="action-link">Vercel</a>
+          <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">Actions</a>
+        </div>
+      </div>
+
+      <!-- Supabase -->
+      <div class="service" id="service-supabase">
+        <div class="service-header">
+          <div class="service-info">
+            <h2>Database</h2>
+            <div class="service-url">Supabase PostgreSQL</div>
           </div>
+          <div class="status checking" id="status-supabase">
+            <span class="status-dot"></span>
+            <span>...</span>
+          </div>
+        </div>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span id="supabase-status">-</span>
+          </div>
+          <div id="supabase-error-box" class="error-box hidden">
+            <div class="error-message" id="supabase-error-message"></div>
+          </div>
+        </div>
+        <div id="supabase-actions" class="action-links">
+          <a href="https://status.supabase.com/" target="_blank" class="action-link">Status</a>
+          <a href="https://supabase.com/dashboard" target="_blank" class="action-link">Dashboard</a>
+        </div>
+      </div>
+
+      <!-- CI Backend -->
+      <div class="service" id="service-ci-backend">
+        <div class="service-header">
+          <div class="service-info">
+            <h2>CI Backend</h2>
+            <div class="service-url">GitHub Actions</div>
+          </div>
+          <div class="status checking" id="status-ci-backend">
+            <span class="status-dot"></span>
+            <span>...</span>
+          </div>
+        </div>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Workflow</span>
+            <span id="ci-backend-workflow">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Commit</span>
+            <span id="ci-backend-commit">-</span>
+          </div>
+          <div id="ci-backend-error-box" class="error-box hidden">
+            <div class="error-message" id="ci-backend-error-message"></div>
+          </div>
+        </div>
+        <div id="ci-backend-actions" class="action-links">
+          <a href="https://github.com/orion-tech-fr/projet-a-backend/actions" target="_blank" class="action-link">Voir logs</a>
+        </div>
+      </div>
+
+      <!-- CI Frontend -->
+      <div class="service" id="service-ci-frontend">
+        <div class="service-header">
+          <div class="service-info">
+            <h2>CI Frontend</h2>
+            <div class="service-url">GitHub Actions</div>
+          </div>
+          <div class="status checking" id="status-ci-frontend">
+            <span class="status-dot"></span>
+            <span>...</span>
+          </div>
+        </div>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Workflow</span>
+            <span id="ci-frontend-workflow">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Commit</span>
+            <span id="ci-frontend-commit">-</span>
+          </div>
+          <div id="ci-frontend-error-box" class="error-box hidden">
+            <div class="error-message" id="ci-frontend-error-message"></div>
+          </div>
+        </div>
+        <div id="ci-frontend-actions" class="action-links">
+          <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">Voir logs</a>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <div class="last-check" id="last-check">Derniere verification: -</div>
-      <button class="refresh-btn" id="refresh-btn" onclick="checkAll()">
-        Actualiser
-      </button>
+      <div class="last-check" id="last-check">Derniere: -</div>
+      <button class="refresh-btn" id="refresh-btn" onclick="checkAll()">Actualiser</button>
       <div class="auto-refresh">
         <input type="checkbox" id="auto-refresh" checked>
-        <label for="auto-refresh">Auto-refresh (30s)</label>
+        <label for="auto-refresh">Auto 30s</label>
       </div>
     </div>
   </div>
@@ -469,12 +461,10 @@
       const httpStatusEl = document.getElementById(`${service.id}-http-status`);
       const errorBox = document.getElementById(`${service.id}-error-box`);
       const errorMessage = document.getElementById(`${service.id}-error-message`);
-      const actionsEl = document.getElementById(`${service.id}-actions`);
 
       statusEl.className = 'status checking';
-      statusEl.innerHTML = '<span class="status-dot"></span><span>Verification...</span>';
+      statusEl.innerHTML = '<span class="status-dot"></span><span>...</span>';
       errorBox.classList.add('hidden');
-      actionsEl.classList.add('hidden');
 
       const startTime = Date.now();
       let httpCode = '-';
@@ -499,7 +489,7 @@
 
         if (response.ok) {
           statusEl.className = 'status online';
-          statusEl.innerHTML = '<span class="status-dot"></span><span>En ligne</span>';
+          statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
           return true;
         } else {
           errorText = `HTTP ${httpCode}`;
@@ -515,21 +505,20 @@
         httpStatusEl.textContent = httpCode;
 
         statusEl.className = 'status offline';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Hors ligne</span>';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>Down</span>';
 
         if (error.name === 'AbortError') {
-          errorText = 'Timeout - Le serveur ne repond pas (>15s). Possible cold start Render ou serveur down.';
+          errorText = 'Timeout (>15s) - Cold start?';
         } else if (error.message.includes('Failed to fetch')) {
-          errorText = 'Connexion impossible - Le serveur est peut-etre en cours de redemarrage ou le deploy a echoue.';
+          errorText = 'Connexion impossible';
         } else if (error.message.includes('CORS')) {
-          errorText = 'Erreur CORS - Le serveur repond mais bloque la requete.';
+          errorText = 'Erreur CORS';
         } else {
-          errorText = error.message || 'Erreur inconnue';
+          errorText = error.message || 'Erreur';
         }
 
         errorMessage.textContent = errorText;
         errorBox.classList.remove('hidden');
-        actionsEl.classList.remove('hidden');
 
         return false;
       }
@@ -543,7 +532,7 @@
       const errorMessage = document.getElementById(`${repo.id}-error-message`);
 
       statusEl.className = 'status checking';
-      statusEl.innerHTML = '<span class="status-dot"></span><span>Verification...</span>';
+      statusEl.innerHTML = '<span class="status-dot"></span><span>...</span>';
       errorBox.classList.add('hidden');
 
       try {
@@ -561,7 +550,7 @@
         const run = data.workflow_runs[0];
 
         if (!run) {
-          workflowEl.textContent = 'Aucun';
+          workflowEl.textContent = '-';
           commitEl.textContent = '-';
           statusEl.className = 'status online';
           statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
@@ -569,23 +558,23 @@
         }
 
         workflowEl.textContent = run.name || 'CI';
-        commitEl.textContent = run.head_commit?.message?.substring(0, 30) + '...' || run.head_sha?.substring(0, 7);
+        commitEl.textContent = run.head_commit?.message?.substring(0, 20) + '...' || run.head_sha?.substring(0, 7);
 
         if (run.status === 'completed') {
           if (run.conclusion === 'success') {
             statusEl.className = 'status online';
-            statusEl.innerHTML = '<span class="status-dot"></span><span>Succes</span>';
+            statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
             return true;
           } else {
             statusEl.className = 'status offline';
-            statusEl.innerHTML = '<span class="status-dot"></span><span>Echec</span>';
-            errorMessage.textContent = `Conclusion: ${run.conclusion}`;
+            statusEl.innerHTML = '<span class="status-dot"></span><span>Fail</span>';
+            errorMessage.textContent = run.conclusion;
             errorBox.classList.remove('hidden');
             return false;
           }
         } else {
           statusEl.className = 'status checking';
-          statusEl.innerHTML = '<span class="status-dot"></span><span>En cours</span>';
+          statusEl.innerHTML = '<span class="status-dot"></span><span>Run...</span>';
           return true;
         }
       } catch (error) {
@@ -605,32 +594,28 @@
       const errorMessage = document.getElementById('supabase-error-message');
 
       statusEl.className = 'status checking';
-      statusEl.innerHTML = '<span class="status-dot"></span><span>Verification...</span>';
+      statusEl.innerHTML = '<span class="status-dot"></span><span>...</span>';
       errorBox.classList.add('hidden');
 
-      // On verifie Supabase indirectement via l'API backend
-      // Si l'API repond, la DB fonctionne
       const apiStatus = document.getElementById('status-api');
-
-      // Attendre un peu que l'API soit verifiee
       await new Promise(resolve => setTimeout(resolve, 100));
 
       if (apiStatus.classList.contains('online')) {
         statusEl.className = 'status online';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Connectee</span>';
-        statusTextEl.textContent = 'Operationnelle (via API)';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
+        statusTextEl.textContent = 'Via API';
         return true;
       } else if (apiStatus.classList.contains('offline')) {
         statusEl.className = 'status offline';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>Inconnue</span>';
-        statusTextEl.textContent = 'Non verifiable (API down)';
-        errorMessage.textContent = 'Impossible de verifier la DB car l\'API est down. Verifiez le status Supabase.';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>?</span>';
+        statusTextEl.textContent = 'API down';
+        errorMessage.textContent = 'Verifier status Supabase';
         errorBox.classList.remove('hidden');
         return false;
       } else {
         statusEl.className = 'status checking';
-        statusEl.innerHTML = '<span class="status-dot"></span><span>En attente</span>';
-        statusTextEl.textContent = 'Verification...';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>...</span>';
+        statusTextEl.textContent = '...';
         return true;
       }
     }
@@ -655,12 +640,12 @@
       const summaryEl = document.getElementById('summary');
 
       if (allOnline) {
-        summaryEl.className = 'all-systems';
-        summaryEl.textContent = 'Tous les systemes sont operationnels';
+        summaryEl.className = '';
+        summaryEl.textContent = 'Tous OK';
       } else {
-        summaryEl.className = 'all-systems has-issues';
+        summaryEl.className = 'has-issues';
         const downCount = allResults.filter(r => !r).length;
-        summaryEl.textContent = `${downCount} service(s) en erreur - voir details ci-dessous`;
+        summaryEl.textContent = `${downCount} erreur(s)`;
       }
 
       document.getElementById('last-check').textContent =
