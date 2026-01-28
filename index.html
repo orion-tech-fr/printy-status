@@ -1039,7 +1039,7 @@
         if (response.ok && data.success) {
           statusEl.className = 'status online';
           statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
-          statusTextEl.textContent = 'Connectée';
+          statusTextEl.innerHTML = '<span style="color: #22c55e">✓ Connectée</span>';
           responseTimeEl.textContent = data.responseTime || '-';
 
           // Recuperer les infos de schema
