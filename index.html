@@ -20,7 +20,7 @@
     }
 
     .container {
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
     }
 
@@ -50,10 +50,13 @@
       background: #1e293b;
       border-radius: 12px;
       padding: 1.25rem;
+      border: 1px solid #334155;
+    }
+
+    .service-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid #334155;
     }
 
     .service-info h2 {
@@ -108,6 +111,64 @@
       50% { opacity: 0.5; }
     }
 
+    .service-details {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #334155;
+      font-size: 0.8rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      color: #94a3b8;
+    }
+
+    .detail-label {
+      color: #64748b;
+    }
+
+    .error-box {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .error-title {
+      color: #ef4444;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .error-message {
+      color: #fca5a5;
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .action-links {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .action-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+    }
+
     .footer {
       text-align: center;
       margin-top: 2rem;
@@ -141,12 +202,6 @@
       cursor: not-allowed;
     }
 
-    .response-time {
-      font-size: 0.7rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
-
     .all-systems {
       text-align: center;
       padding: 1rem;
@@ -177,6 +232,10 @@
     .auto-refresh input {
       accent-color: #3b82f6;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -191,27 +250,75 @@
     </div>
 
     <div class="services" id="services">
+      <!-- API Backend -->
       <div class="service" id="service-api">
-        <div class="service-info">
-          <h2>API Backend</h2>
-          <div class="service-url">printy-api-0te4.onrender.com</div>
-          <div class="response-time" id="api-response-time"></div>
+        <div class="service-header">
+          <div class="service-info">
+            <h2>API Backend</h2>
+            <div class="service-url">printy-api-0te4.onrender.com</div>
+          </div>
+          <div class="status checking" id="status-api">
+            <span class="status-dot"></span>
+            <span>Verification...</span>
+          </div>
         </div>
-        <div class="status checking" id="status-api">
-          <span class="status-dot"></span>
-          <span>Verification...</span>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Temps de reponse</span>
+            <span id="api-response-time">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">HTTP Status</span>
+            <span id="api-http-status">-</span>
+          </div>
+          <div id="api-error-box" class="error-box hidden">
+            <div class="error-title">Erreur detectee</div>
+            <div class="error-message" id="api-error-message"></div>
+          </div>
+          <div id="api-actions" class="action-links hidden">
+            <a href="https://dashboard.render.com" target="_blank" class="action-link">
+              Render Dashboard
+            </a>
+            <a href="https://github.com/orion-tech-fr/projet-a-backend/actions" target="_blank" class="action-link">
+              GitHub Actions
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- Frontend -->
       <div class="service" id="service-frontend">
-        <div class="service-info">
-          <h2>Frontend</h2>
-          <div class="service-url">3dprinty.vercel.app</div>
-          <div class="response-time" id="frontend-response-time"></div>
+        <div class="service-header">
+          <div class="service-info">
+            <h2>Frontend</h2>
+            <div class="service-url">3dprinty.vercel.app</div>
+          </div>
+          <div class="status checking" id="status-frontend">
+            <span class="status-dot"></span>
+            <span>Verification...</span>
+          </div>
         </div>
-        <div class="status checking" id="status-frontend">
-          <span class="status-dot"></span>
-          <span>Verification...</span>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Temps de reponse</span>
+            <span id="frontend-response-time">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">HTTP Status</span>
+            <span id="frontend-http-status">-</span>
+          </div>
+          <div id="frontend-error-box" class="error-box hidden">
+            <div class="error-title">Erreur detectee</div>
+            <div class="error-message" id="frontend-error-message"></div>
+          </div>
+          <div id="frontend-actions" class="action-links hidden">
+            <a href="https://vercel.com/dashboard" target="_blank" class="action-link">
+              Vercel Dashboard
+            </a>
+            <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">
+              GitHub Actions
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -234,11 +341,13 @@
         id: 'api',
         name: 'API Backend',
         url: 'https://printy-api-0te4.onrender.com/api/health',
+        dashboardUrl: 'https://dashboard.render.com',
       },
       {
         id: 'frontend',
         name: 'Frontend',
         url: 'https://3dprinty.vercel.app',
+        dashboardUrl: 'https://vercel.com/dashboard',
       }
     ];
 
@@ -247,33 +356,72 @@
     async function checkService(service) {
       const statusEl = document.getElementById(`status-${service.id}`);
       const responseTimeEl = document.getElementById(`${service.id}-response-time`);
+      const httpStatusEl = document.getElementById(`${service.id}-http-status`);
+      const errorBox = document.getElementById(`${service.id}-error-box`);
+      const errorMessage = document.getElementById(`${service.id}-error-message`);
+      const actionsEl = document.getElementById(`${service.id}-actions`);
 
       statusEl.className = 'status checking';
       statusEl.innerHTML = '<span class="status-dot"></span><span>Verification...</span>';
+      errorBox.classList.add('hidden');
+      actionsEl.classList.add('hidden');
 
       const startTime = Date.now();
+      let httpCode = '-';
+      let errorText = '';
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const response = await fetch(service.url, {
           method: 'GET',
           mode: 'cors',
+          signal: controller.signal,
         });
 
+        clearTimeout(timeoutId);
         const responseTime = Date.now() - startTime;
+        httpCode = response.status;
+
+        responseTimeEl.textContent = `${responseTime}ms`;
+        httpStatusEl.textContent = httpCode;
 
         if (response.ok) {
           statusEl.className = 'status online';
           statusEl.innerHTML = '<span class="status-dot"></span><span>En ligne</span>';
-          responseTimeEl.textContent = `${responseTime}ms`;
           return true;
         } else {
-          throw new Error(`HTTP ${response.status}`);
+          errorText = `HTTP ${httpCode}`;
+          if (httpCode === 500) errorText += ' - Erreur serveur interne';
+          if (httpCode === 502) errorText += ' - Bad Gateway (serveur down)';
+          if (httpCode === 503) errorText += ' - Service indisponible';
+          if (httpCode === 504) errorText += ' - Gateway Timeout';
+          throw new Error(errorText);
         }
       } catch (error) {
         const responseTime = Date.now() - startTime;
+        responseTimeEl.textContent = responseTime > 10000 ? 'Timeout' : `${responseTime}ms`;
+        httpStatusEl.textContent = httpCode;
+
         statusEl.className = 'status offline';
         statusEl.innerHTML = '<span class="status-dot"></span><span>Hors ligne</span>';
-        responseTimeEl.textContent = responseTime > 100 ? `Timeout` : `Erreur`;
+
+        // Determine error type
+        if (error.name === 'AbortError') {
+          errorText = 'Timeout - Le serveur ne repond pas (>15s). Possible cold start Render ou serveur down.';
+        } else if (error.message.includes('Failed to fetch')) {
+          errorText = 'Connexion impossible - Le serveur est peut-etre en cours de redemarrage ou le deploy a echoue.';
+        } else if (error.message.includes('CORS')) {
+          errorText = 'Erreur CORS - Le serveur repond mais bloque la requete.';
+        } else {
+          errorText = error.message || 'Erreur inconnue';
+        }
+
+        errorMessage.textContent = errorText;
+        errorBox.classList.remove('hidden');
+        actionsEl.classList.remove('hidden');
+
         return false;
       }
     }
@@ -293,7 +441,8 @@
         summaryEl.textContent = 'Tous les systemes sont operationnels';
       } else {
         summaryEl.className = 'all-systems has-issues';
-        summaryEl.textContent = 'Certains services rencontrent des problemes';
+        const downCount = results.filter(r => !r).length;
+        summaryEl.textContent = `${downCount} service(s) en erreur - voir details ci-dessous`;
       }
 
       document.getElementById('last-check').textContent =
@@ -314,11 +463,9 @@
         }
       });
 
-      // Start auto-refresh by default
       autoRefreshInterval = setInterval(checkAll, 30000);
     }
 
-    // Initial check
     checkAll();
     setupAutoRefresh();
   </script>
