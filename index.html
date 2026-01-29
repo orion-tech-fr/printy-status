@@ -230,6 +230,8 @@
       flex: 1;
       font-size: 0.95rem;
       color: #94a3b8;
+      overflow-y: auto;
+      min-height: 0;
     }
 
     .detail-row {
@@ -395,7 +397,7 @@
       flex-direction: column;
       gap: 0.2rem;
       width: 100%;
-      max-height: 200px;
+      max-height: 120px;
       overflow-y: auto;
       min-height: 30px;
       scrollbar-width: thin;
@@ -665,16 +667,8 @@
             <span id="supabase-response-time">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Schema</span>
-            <span id="supabase-schema">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Derniere MAJ</span>
+            <span class="detail-label">MAJ</span>
             <span id="supabase-migration">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date MAJ</span>
-            <span id="supabase-migration-date">-</span>
           </div>
           <div class="detail-row" style="flex-direction: column; gap: 0.3rem;">
             <span class="detail-label">Tables</span>
@@ -1058,7 +1052,6 @@
       const statusEl = document.getElementById('status-supabase');
       const statusTextEl = document.getElementById('supabase-status');
       const responseTimeEl = document.getElementById('supabase-response-time');
-      const schemaEl = document.getElementById('supabase-schema');
       const migrationEl = document.getElementById('supabase-migration');
       const tablesEl = document.getElementById('supabase-tables');
       const errorBox = document.getElementById('supabase-error-box');
@@ -1094,9 +1087,6 @@
               const schemaData = await schemaResponse.json();
               if (schemaData.success && schemaData.schema) {
                 const schema = schemaData.schema;
-                schemaEl.textContent = schema.strategy === 'migrations' ? 'Migrations' : 'DB Push';
-
-                const migrationDateEl = document.getElementById('supabase-migration-date');
                 if (schema.lastMigration) {
                   const migDate = new Date(schema.lastMigration.appliedAt);
                   const migDateStr = migDate.toLocaleString('fr-FR', {
@@ -1107,22 +1097,20 @@
                     minute: '2-digit',
                   });
                   const migName = schema.lastMigration.name.replace(/^\d+_/, '').replace(/_/g, ' ');
-                  migrationEl.innerHTML = `<span style="color: #a78bfa">${migName}</span>`;
+                  migrationEl.innerHTML = `<span style="color: #a78bfa">${migName}</span> <span style="color: #64748b; font-size: 0.85rem">${migDateStr}</span>`;
                   migrationEl.title = schema.lastMigration.name;
-                  migrationDateEl.textContent = migDateStr;
                 } else if (schema.lastActivity) {
-                  migrationEl.innerHTML = '<span style="color: #a78bfa">db push</span>';
                   const actDate = new Date(schema.lastActivity);
-                  migrationDateEl.textContent = actDate.toLocaleString('fr-FR', {
+                  const actDateStr = actDate.toLocaleString('fr-FR', {
                     day: '2-digit',
                     month: '2-digit',
                     year: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
                   });
+                  migrationEl.innerHTML = `<span style="color: #a78bfa">db push</span> <span style="color: #64748b; font-size: 0.85rem">${actDateStr}</span>`;
                 } else {
                   migrationEl.textContent = 'N/A';
-                  migrationDateEl.textContent = '-';
                 }
 
                 if (schema.tables) {
@@ -1156,7 +1144,6 @@
           statusEl.innerHTML = '<span class="status-dot"></span><span>Down</span>';
           statusTextEl.textContent = 'Deconnectee';
           responseTimeEl.textContent = '-';
-          schemaEl.textContent = '-';
           migrationEl.textContent = '-';
           tablesEl.textContent = '-';
           errorMessage.textContent = data.error || 'Connexion DB echouee';
@@ -1168,7 +1155,6 @@
         statusEl.innerHTML = '<span class="status-dot"></span><span>?</span>';
         statusTextEl.textContent = 'Non verifiable';
         responseTimeEl.textContent = '-';
-        schemaEl.textContent = '-';
         migrationEl.textContent = '-';
         tablesEl.textContent = '-';
         errorMessage.textContent = error.name === 'AbortError' ? 'Timeout' : 'API inaccessible';
