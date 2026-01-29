@@ -14,8 +14,9 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     body {
@@ -123,12 +124,12 @@
     }
 
     .services {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
       flex: 1;
       min-height: 0;
+      justify-content: center;
     }
 
     .service {
@@ -138,6 +139,9 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
+      flex: 1 1 calc(33.333% - 1rem);
+      min-width: 280px;
+      max-width: 100%;
     }
 
     .service-header {
@@ -385,15 +389,40 @@
       accent-color: #3b82f6;
     }
 
+    .table-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      width: 100%;
+    }
+
+    .table-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(51, 65, 85, 0.4);
+    }
+
+    .table-name {
+      color: #94a3b8;
+    }
+
+    .table-count {
+      color: #22c55e;
+      font-weight: 600;
+      font-family: monospace;
+    }
+
     .hidden {
       display: none;
     }
 
     /* Tablette */
     @media (max-width: 900px) {
-      .services {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: auto;
+      .service {
+        flex: 1 1 calc(50% - 1rem);
       }
       .header-row {
         flex-wrap: wrap;
@@ -409,9 +438,8 @@
       .container {
         height: auto;
       }
-      .services {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: auto;
+      .service {
+        flex: 1 1 calc(33.333% - 1rem);
       }
     }
 
@@ -431,13 +459,11 @@
         min-height: auto;
       }
       .services {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
         gap: 0.5rem;
       }
       .service {
+        flex: 1 1 100%;
         padding: 0.75rem;
-        max-width: 100%;
       }
       .service-url {
         max-width: calc(100vw - 5rem);
@@ -624,16 +650,16 @@
             <span id="supabase-schema">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Dernière migration</span>
+            <span class="detail-label">Derniere MAJ</span>
             <span id="supabase-migration">-</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Date migration</span>
+            <span class="detail-label">Date MAJ</span>
             <span id="supabase-migration-date">-</span>
           </div>
-          <div class="detail-row">
+          <div class="detail-row" style="flex-direction: column; gap: 0.3rem;">
             <span class="detail-label">Tables</span>
-            <span id="supabase-tables">-</span>
+            <div id="supabase-tables" class="table-list">-</div>
           </div>
           <div id="supabase-error-box" class="error-box hidden">
             <div class="error-message" id="supabase-error-message"></div>
@@ -1061,24 +1087,43 @@
                     hour: '2-digit',
                     minute: '2-digit',
                   });
-                  // Extraire le nom court de la migration (enlever le timestamp)
                   const migName = schema.lastMigration.name.replace(/^\d+_/, '').replace(/_/g, ' ');
                   migrationEl.innerHTML = `<span style="color: #a78bfa">${migName}</span>`;
                   migrationEl.title = schema.lastMigration.name;
                   migrationDateEl.textContent = migDateStr;
+                } else if (schema.lastActivity) {
+                  migrationEl.innerHTML = '<span style="color: #a78bfa">db push</span>';
+                  const actDate = new Date(schema.lastActivity);
+                  migrationDateEl.textContent = actDate.toLocaleString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
                 } else {
                   migrationEl.textContent = 'N/A';
                   migrationDateEl.textContent = '-';
                 }
 
                 if (schema.tables) {
-                  const tableCounts = Object.entries(schema.tables)
-                    .map(([name, count]) => `${count}`)
-                    .join(' / ');
-                  tablesEl.textContent = tableCounts;
-                  tablesEl.title = Object.entries(schema.tables)
-                    .map(([name, count]) => `${name}: ${count}`)
-                    .join(', ');
+                  const tableNames = {
+                    users: 'Users',
+                    printerProfiles: 'Printer Profiles',
+                    projects: 'Projects',
+                    projectMedia: 'Project Media',
+                    projectComments: 'Comments',
+                    commentAttachments: 'Comment Attachments',
+                    conversations: 'Conversations',
+                    messages: 'Messages',
+                    messageAttachments: 'Message Attachments',
+                    refreshTokens: 'Refresh Tokens',
+                  };
+                  const total = Object.values(schema.tables).reduce((s, c) => s + c, 0);
+                  tablesEl.innerHTML = Object.entries(schema.tables)
+                    .map(([key, count]) => `<div class="table-item"><span class="table-name">${tableNames[key] || key}</span><span class="table-count">${count}</span></div>`)
+                    .join('')
+                    + `<div class="table-item" style="border-top: 1px solid #334155; margin-top: 0.2rem; padding-top: 0.3rem;"><span class="table-name" style="font-weight:600; color:#cbd5e1;">Total</span><span class="table-count">${total}</span></div>`;
                 }
               }
             }
