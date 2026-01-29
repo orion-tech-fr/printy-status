@@ -325,6 +325,18 @@
       color: #fca5a5;
       font-family: monospace;
       word-break: break-all;
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .error-message div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .error-message div:first-child {
+      font-weight: 600;
     }
 
     .action-links {
@@ -1061,7 +1073,27 @@
       } else if (pipeline.status === 'failure' || pipeline.status === 'error') {
         statusEl.className = 'status offline';
         statusEl.innerHTML = '<span class="status-dot"></span><span>Fail</span>';
-        errorMessage.textContent = pipeline.error || pipeline.status;
+
+        // Construire un resume des erreurs
+        const failedJobs = (pipeline.jobs || []).filter(j => j.status === 'failure');
+        const errorLines = [];
+        failedJobs.forEach(job => {
+          if (job.failedSteps && job.failedSteps.length > 0) {
+            errorLines.push(`${job.name}: ${job.failedSteps.join(', ')}`);
+          } else {
+            errorLines.push(`${job.name}: echec`);
+          }
+          if (job.errors && job.errors.length > 0) {
+            job.errors.slice(0, 2).forEach(e => {
+              const short = e.length > 80 ? e.substring(0, 80) + '...' : e;
+              errorLines.push(short);
+            });
+          }
+        });
+
+        errorMessage.innerHTML = errorLines.length > 0
+          ? errorLines.slice(0, 2).map(l => `<div>${l}</div>`).join('')
+          : pipeline.error || pipeline.status;
         errorBox.classList.remove('hidden');
       } else if (pipeline.status === 'in_progress' || pipeline.status === 'queued') {
         statusEl.className = 'status checking';
