@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Printy Status</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='60' width='70' height='30' rx='3' fill='%2322c55e'/><rect x='25' y='35' width='50' height='25' rx='2' fill='%2322c55e' opacity='0.8'/><rect x='35' y='15' width='30' height='20' rx='2' fill='%2322c55e' opacity='0.6'/><rect x='45' y='5' width='10' height='10' fill='%2322c55e' opacity='0.4'/></svg>">
+  <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='60' width='70' height='30' rx='3' fill='%2322c55e'/><rect x='25' y='35' width='50' height='25' rx='2' fill='%2322c55e' opacity='0.8'/><rect x='35' y='15' width='30' height='20' rx='2' fill='%2322c55e' opacity='0.6'/><rect x='45' y='5' width='10' height='10' fill='%2322c55e' opacity='0.4'/></svg>">
   <style>
     * {
       margin: 0;
@@ -1305,8 +1305,10 @@
         if (deployCount > 0) parts.push(`${deployCount} deploy`);
         if (ciCount > 0) parts.push(`${ciCount} CI`);
         inProgressEl.textContent = `${parts.join(' + ')} en cours`;
+        startFaviconSpinner();
       } else {
         inProgressEl.style.display = 'none';
+        stopFaviconSpinner();
       }
 
       // Mettre a jour le chrono depuis le dernier deploy reussi (backend et frontend)
@@ -1343,6 +1345,28 @@
       });
 
       autoRefreshInterval = setInterval(checkAll, 30000);
+    }
+
+    // Favicon spinner
+    const defaultFavicon = document.getElementById('favicon').href;
+    let faviconInterval = null;
+
+    function startFaviconSpinner() {
+      if (faviconInterval) return;
+      let angle = 0;
+      faviconInterval = setInterval(() => {
+        angle = (angle + 30) % 360;
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23334155' stroke-width='8'/><path d='M50 10 A40 40 0 0 1 90 50' fill='none' stroke='%23f59e0b' stroke-width='8' stroke-linecap='round' transform='rotate(${angle} 50 50)'/></svg>`;
+        document.getElementById('favicon').href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      }, 100);
+    }
+
+    function stopFaviconSpinner() {
+      if (faviconInterval) {
+        clearInterval(faviconInterval);
+        faviconInterval = null;
+      }
+      document.getElementById('favicon').href = defaultFavicon;
     }
 
     checkAll();
