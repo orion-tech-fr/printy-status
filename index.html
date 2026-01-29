@@ -394,8 +394,24 @@
       flex-direction: column;
       gap: 0.2rem;
       width: 100%;
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: auto;
+      min-height: 30px;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+
+    .table-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .table-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .table-list::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 2px;
     }
 
     .table-item {
