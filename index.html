@@ -312,6 +312,13 @@
       color: #fcd34d;
     }
 
+    .job-time {
+      color: #475569;
+      font-size: 0.75rem;
+      font-family: monospace;
+      margin-left: auto;
+    }
+
     .error-box {
       margin-top: 0.5rem;
       padding: 0.5rem;
@@ -837,6 +844,22 @@
   </div>
 
   <script>
+    // Mapping dynamique des noms de tables (fallback: nom technique)
+    const TABLE_NAMES = {
+      users: 'Users',
+      printerProfiles: 'Printer Profiles',
+      projects: 'Projects',
+      projectMedia: 'Project Media',
+      projectComments: 'Comments',
+      commentAttachments: 'Comment Attach.',
+      conversations: 'Conversations',
+      messages: 'Messages',
+      messageAttachments: 'Message Attach.',
+      refreshTokens: 'Refresh Tokens',
+      quotes: 'Quotes',
+      orders: 'Orders',
+    };
+
     const httpServices = [
       {
         id: 'api',
@@ -992,6 +1015,9 @@
 
         const data = await response.json();
 
+        // Stocker les donnees CI pour croisement avec deploy
+        lastCIData = data.pipelines;
+
         // Update backend CI
         const backendPipeline = data.pipelines.find(p => p.name === 'backend');
         if (backendPipeline) {
@@ -1012,11 +1038,9 @@
         // Fallback: marquer comme indisponible
         ['ci-backend', 'ci-frontend'].forEach(id => {
           const statusEl = document.getElementById(`status-${id}`);
-          const workflowEl = document.getElementById(`${id}-workflow`);
           const commitEl = document.getElementById(`${id}-commit`);
           statusEl.className = 'status checking';
           statusEl.innerHTML = '<span class="status-dot"></span><span>N/A</span>';
-          workflowEl.textContent = 'API indisponible';
           commitEl.textContent = '-';
         });
         return { ok: true, inProgress: 0 }; // Ne pas compter comme erreur critique
@@ -1067,8 +1091,17 @@
       const expected = expectedJobs[id] || [];
       let foundInProgress = false;
 
+      // Construire la map des jobs avec completedAt
+      const jobDataMap = {};
+      if (pipeline.jobs) {
+        pipeline.jobs.forEach(job => {
+          jobDataMap[job.name] = job;
+        });
+      }
+
       const jobsHtml = expected.map(jobName => {
-        const status = jobStatusMap[jobName];
+        const jobData = jobDataMap[jobName];
+        const status = jobData?.status;
         let icon, statusClass;
 
         if (status === 'success') {
@@ -1093,9 +1126,17 @@
           statusClass = foundInProgress || !status ? 'pending' : 'queued';
         }
 
+        // Heure de fin du job
+        let timeStr = '';
+        if (jobData?.completedAt) {
+          const d = new Date(jobData.completedAt);
+          timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
         return `<div class="job-item">
           <span class="job-icon ${statusClass}">${icon}</span>
           <span class="job-name ${statusClass}">${jobName}</span>
+          ${timeStr ? `<span class="job-time">${timeStr}</span>` : ''}
         </div>`;
       }).join('');
 
@@ -1204,24 +1245,12 @@
                 }
 
                 if (schema.tables) {
-                  const tableNames = {
-                    users: 'Users',
-                    printerProfiles: 'Printer Profiles',
-                    projects: 'Projects',
-                    projectMedia: 'Project Media',
-                    projectComments: 'Comments',
-                    commentAttachments: 'Comment Attachments',
-                    conversations: 'Conversations',
-                    messages: 'Messages',
-                    messageAttachments: 'Message Attachments',
-                    refreshTokens: 'Refresh Tokens',
-                  };
                   const total = Object.values(schema.tables).reduce((s, c) => s + c, 0);
                   tablesEl.innerHTML = Object.entries(schema.tables)
-                    .map(([key, count]) => `<div class="table-item"><span class="table-name">${tableNames[key] || key}</span><span class="table-count">${count}</span></div>`)
+                    .map(([key, count]) => `<div class="table-item"><span class="table-name">${TABLE_NAMES[key] || key}</span><span class="table-count">${count}</span></div>`)
                     .join('');
                   const totalEl = document.getElementById('supabase-tables-total');
-                  totalEl.innerHTML = `<span class="table-name">Total</span><span class="table-count">${total}</span>`;
+                  totalEl.innerHTML = `<span class="table-name">Total (${Object.keys(schema.tables).length} tables)</span><span class="table-count">${total}</span>`;
                 }
 
                 // Activite recente
@@ -1229,7 +1258,7 @@
                   const activityEl = document.getElementById('recent-activity');
                   activityEl.classList.remove('hidden');
                   activityEl.innerHTML = schema.recentActivity.map(item => {
-                    const name = tableNames[item.key] || item.key;
+                    const name = TABLE_NAMES[item.key] || item.key;
                     const time = new Date(item.lastAt).toLocaleString('fr-FR', {
                       day: '2-digit', month: '2-digit',
                       hour: '2-digit', minute: '2-digit',
@@ -1329,6 +1358,9 @@
       }
     }
 
+    // Stocker les resultats CI pour croisement avec deploy
+    let lastCIData = null;
+
     async function checkAll() {
       const btn = document.getElementById('refresh-btn');
       btn.disabled = true;
@@ -1348,6 +1380,33 @@
         checkDeployStatus('https://printy-api-0te4.onrender.com/api/health/deploy', 'api-deploy-status'),
         checkDeployStatus('https://printy-api-0te4.onrender.com/api/health/deploy/frontend', 'frontend-deploy-status'),
       ]);
+
+      // Croiser CI et deploy : si le job "deploy" du CI frontend est en cours,
+      // forcer l'affichage du deploy frontend comme "en cours" (le deploy --prebuilt est trop rapide pour le polling Vercel)
+      if (lastCIData) {
+        const frontendPipeline = lastCIData.find(p => p.name === 'frontend');
+        if (frontendPipeline) {
+          const deployJob = (frontendPipeline.jobs || []).find(j => j.name === 'deploy');
+          if (deployJob && (deployJob.status === 'in_progress' || deployJob.status === 'queued')) {
+            frontendDeployResult.inProgress = true;
+            frontendDeployResult.status = 'deploying';
+            const deployStatusEl = document.getElementById('frontend-deploy-status');
+            deployStatusEl.textContent = statusLabels['deploying'];
+            deployStatusEl.style.color = statusColors['deploying'];
+          }
+        }
+        const backendPipeline = lastCIData.find(p => p.name === 'backend');
+        if (backendPipeline) {
+          const deployJob = (backendPipeline.jobs || []).find(j => j.name === 'deploy');
+          if (deployJob && (deployJob.status === 'in_progress' || deployJob.status === 'queued')) {
+            backendDeployResult.inProgress = true;
+            backendDeployResult.status = 'deploying';
+            const deployStatusEl = document.getElementById('api-deploy-status');
+            deployStatusEl.textContent = statusLabels['deploying'];
+            deployStatusEl.style.color = statusColors['deploying'];
+          }
+        }
+      }
 
       // Calculer le résumé
       const summaryEl = document.getElementById('summary');
