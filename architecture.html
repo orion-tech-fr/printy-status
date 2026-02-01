@@ -32,14 +32,8 @@
     }
 
     .diagram-wrapper {
-      overflow: auto;
       width: 100%;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .diagram-wrapper::-webkit-scrollbar {
-      display: none;
+      overflow: visible;
     }
 
     .hdr-btn {
@@ -79,10 +73,10 @@
     .diagram {
       position: relative;
       width: 1100px;
-      min-width: 1100px;
       height: 700px;
       padding: 0 1rem;
       margin: 0 auto;
+      transform-origin: top center;
     }
 
     svg.connections {
@@ -546,18 +540,13 @@
       editMode = !editMode;
       document.body.classList.toggle('edit-mode', editMode);
       const btn = document.getElementById('btn-edit');
-      const wrapper = document.getElementById('diagram-wrapper');
       if (editMode) {
         btn.classList.add('active');
         btn.textContent = '✏ Editer (ON)';
-        wrapper.style.overflow = 'hidden';
-        wrapper.style.touchAction = 'none';
         showToast('Mode edition active');
       } else {
         btn.classList.remove('active');
         btn.textContent = '✏ Editer';
-        wrapper.style.overflow = 'auto';
-        wrapper.style.touchAction = '';
         savePositions();
         saveLabelOffsets();
         showToast('Positions sauvegardees');
@@ -576,8 +565,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
+        dragOffsetX = (e.clientX - rect.left) / currentScale;
+        dragOffsetY = (e.clientY - rect.top) / currentScale;
       });
 
       // Touch support
@@ -588,8 +577,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = touch.clientX - rect.left;
-        dragOffsetY = touch.clientY - rect.top;
+        dragOffsetX = (touch.clientX - rect.left) / currentScale;
+        dragOffsetY = (touch.clientY - rect.top) / currentScale;
       }, { passive: false });
     });
 
@@ -608,11 +597,11 @@
     function moveNode(clientX, clientY) {
       const diagram = document.getElementById('diagram');
       const dRect = diagram.getBoundingClientRect();
-      let x = clientX - dRect.left - dragOffsetX;
-      let y = clientY - dRect.top - dragOffsetY;
+      let x = (clientX - dRect.left) / currentScale - dragOffsetX;
+      let y = (clientY - dRect.top) / currentScale - dragOffsetY;
 
-      x = Math.max(0, Math.min(x, dRect.width - dragNode.offsetWidth));
-      y = Math.max(0, Math.min(y, dRect.height - dragNode.offsetHeight));
+      x = Math.max(0, Math.min(x, 1100 - dragNode.offsetWidth));
+      y = Math.max(0, Math.min(y, 700 - dragNode.offsetHeight));
 
       dragNode.style.left = `${x}px`;
       dragNode.style.top = `${y}px`;
@@ -642,14 +631,14 @@
       e.stopPropagation();
       dragLabel = target;
       dragLabel.classList.add('dragging');
-      labelDragStartX = e.clientX - parseFloat(dragLabel.getAttribute('x'));
-      labelDragStartY = e.clientY - parseFloat(dragLabel.getAttribute('y'));
+      labelDragStartX = e.clientX / currentScale - parseFloat(dragLabel.getAttribute('x'));
+      labelDragStartY = e.clientY / currentScale - parseFloat(dragLabel.getAttribute('y'));
     });
 
     document.addEventListener('mousemove', (e) => {
       if (!dragLabel) return;
-      const newX = e.clientX - labelDragStartX;
-      const newY = e.clientY - labelDragStartY;
+      const newX = e.clientX / currentScale - labelDragStartX;
+      const newY = e.clientY / currentScale - labelDragStartY;
       dragLabel.setAttribute('x', newX);
       dragLabel.setAttribute('y', newY);
     });
@@ -949,11 +938,24 @@
       updateGroupBoxes();
     };
 
+    // Auto-scale diagram to fit screen
+    let currentScale = 1;
+    function scaleDiagram() {
+      const wrapper = document.getElementById('diagram-wrapper');
+      const diagram = document.getElementById('diagram');
+      const availableWidth = wrapper.clientWidth;
+      currentScale = Math.min(1, availableWidth / 1100);
+      diagram.style.transform = `scale(${currentScale})`;
+      wrapper.style.height = `${700 * currentScale}px`;
+    }
+
     // Init
     initPositions();
     drawConnections();
+    scaleDiagram();
 
     window.addEventListener('resize', () => {
+      scaleDiagram();
       drawConnections();
     });
   </script>
