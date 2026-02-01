@@ -469,8 +469,12 @@
       'n-status':      { x: 40, y: 55 },
     };
 
-    const STORAGE_KEY = 'printy-arch-positions';
-    const LABEL_STORAGE_KEY = 'printy-arch-label-offsets';
+    const STORAGE_KEY = 'printy-arch-positions-v2';
+    const LABEL_STORAGE_KEY = 'printy-arch-label-offsets-v2';
+
+    // Nettoyer anciennes cles
+    localStorage.removeItem('printy-arch-positions');
+    localStorage.removeItem('printy-arch-label-offsets');
 
     function loadLabelOffsets() {
       try {
