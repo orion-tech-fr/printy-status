@@ -829,6 +829,48 @@
           <a href="https://github.com/orion-tech-fr/projet-a-front/actions" target="_blank" class="action-link">Projet</a>
         </div>
       </div>
+      <!-- UptimeRobot -->
+      <div class="service" id="service-uptimerobot">
+        <div class="service-header">
+          <div class="service-info">
+            <h2>UptimeRobot</h2>
+            <span class="service-url">Keep-alive ping</span>
+          </div>
+          <div class="status checking" id="status-uptimerobot">
+            <span class="status-dot"></span>
+            <span>...</span>
+          </div>
+        </div>
+        <div class="service-details">
+          <div class="detail-row">
+            <span class="detail-label">Cible</span>
+            <span id="uptimerobot-target" style="font-size: 0.8rem;">printy-api-0te4.onrender.com/api/health</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Intervalle</span>
+            <span id="uptimerobot-interval">5 min</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Type</span>
+            <span>HTTP(s) GET</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Role</span>
+            <span style="font-size: 0.85rem; color: #94a3b8;">Evite le cold start Render (plan gratuit)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span id="uptimerobot-status">-</span>
+          </div>
+          <div id="uptimerobot-error-box" class="error-box hidden">
+            <div class="error-message" id="uptimerobot-error-message"></div>
+          </div>
+        </div>
+        <div id="uptimerobot-actions" class="action-links">
+          <a href="https://uptimerobot.com/dashboard" target="_blank" class="action-link">Dashboard</a>
+          <a href="https://uptimerobot.com/pricing" target="_blank" class="action-link">Plan</a>
+        </div>
+      </div>
     </div>
 
     <div id="recent-activity" class="recent-activity hidden"></div>
@@ -1361,6 +1403,39 @@
     // Stocker les resultats CI pour croisement avec deploy
     let lastCIData = null;
 
+    // Verifier indirectement si UptimeRobot fonctionne en mesurant le temps de reponse du backend
+    // Si le backend repond vite (< 3s), UptimeRobot le garde eveille. Sinon, cold start = ping inactif.
+    function updateUptimeRobotStatus(apiResponseTime) {
+      const statusEl = document.getElementById('status-uptimerobot');
+      const statusTextEl = document.getElementById('uptimerobot-status');
+      const errorBox = document.getElementById('uptimerobot-error-box');
+      const errorMessage = document.getElementById('uptimerobot-error-message');
+
+      errorBox.classList.add('hidden');
+
+      if (apiResponseTime === null) {
+        // API down, impossible de determiner
+        statusEl.className = 'status checking';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>N/A</span>';
+        statusTextEl.innerHTML = '<span style="color: #64748b">API inaccessible</span>';
+        return;
+      }
+
+      if (apiResponseTime < 3000) {
+        // Reponse rapide = pas de cold start = UptimeRobot actif
+        statusEl.className = 'status online';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>OK</span>';
+        statusTextEl.innerHTML = `<span style="color: #22c55e">✓ Actif</span> <span style="color: #64748b; font-size: 0.85rem">(API: ${apiResponseTime}ms)</span>`;
+      } else {
+        // Reponse lente = cold start = UptimeRobot probablement inactif
+        statusEl.className = 'status offline';
+        statusEl.innerHTML = '<span class="status-dot"></span><span>Inactif?</span>';
+        statusTextEl.innerHTML = `<span style="color: #f59e0b">⚠ Cold start detecte</span>`;
+        errorMessage.textContent = `API a mis ${(apiResponseTime / 1000).toFixed(1)}s → UptimeRobot ne semble pas actif. Verifier la configuration.`;
+        errorBox.classList.remove('hidden');
+      }
+    }
+
     async function checkAll() {
       const btn = document.getElementById('refresh-btn');
       btn.disabled = true;
@@ -1368,6 +1443,11 @@
 
       // Check HTTP services
       const httpResults = await Promise.all(httpServices.map(checkHttpService));
+
+      // Mettre a jour le statut UptimeRobot en fonction du temps de reponse de l'API
+      const apiTimeText = document.getElementById('api-response-time').textContent;
+      const apiResponseTime = httpResults[0] ? parseInt(apiTimeText) || null : null;
+      updateUptimeRobotStatus(apiResponseTime);
 
       // Check GitHub CI via backend API
       const ciResult = await checkAllCI();
@@ -1421,6 +1501,7 @@
       const deployInProgress = (backendDeployResult.inProgress ? 1 : 0) + (frontendDeployResult.inProgress ? 1 : 0);
       const deployErrors = (backendDeployResult.isFailed ? 1 : 0) + (frontendDeployResult.isFailed ? 1 : 0);
 
+      // UptimeRobot n'est pas critique, ne pas le compter dans les erreurs
       const totalOk = httpOk + dbOk + ciOk - ciInProgress;
       const totalErrors = httpErrors + dbErrors + ciErrors + deployErrors;
       const totalInProgress = ciInProgress + deployInProgress;
