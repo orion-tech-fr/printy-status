@@ -17,20 +17,24 @@
 
     header {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1rem;
-      position: relative;
+      gap: 0.5rem;
+      padding: 0.8rem 1rem;
     }
 
-    h1 { font-size: 1.5rem; font-weight: 600; }
+    h1 { font-size: 1.5rem; font-weight: 600; white-space: nowrap; }
 
     .header-btns {
-      position: absolute;
-      left: 1rem;
       display: flex;
       gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .diagram-wrapper {
+      overflow: hidden;
+      width: 100%;
     }
 
     .hdr-btn {
@@ -69,9 +73,7 @@
 
     .diagram {
       position: relative;
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
+      width: 1100px;
       height: 700px;
       padding: 0 1rem;
     }
@@ -324,11 +326,7 @@
     }
 
     @media (max-width: 768px) {
-      .diagram { height: 1100px; }
-      .node { padding: 0.4rem 0.6rem; }
-      .node-icon { width: 24px; height: 24px; font-size: 0.8rem; }
-      .node-text h3 { font-size: 0.75rem; }
-      .node-text span { font-size: 0.6rem; }
+      .legend { flex-wrap: wrap; justify-content: center; }
     }
   </style>
 </head>
@@ -352,13 +350,13 @@
     <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Monitoring</div>
   </div>
 
+  <div class="diagram-wrapper" id="diagram-wrapper">
   <div class="diagram" id="diagram">
     <!-- Group boxes -->
     <div class="group-box" id="group-frontend"><div class="group-label">Frontend</div></div>
     <div class="group-box" id="group-backend"><div class="group-label">Backend</div></div>
     <div class="group-box" id="group-local"><div class="group-label">Dev local</div></div>
     <div class="group-box" id="group-data"><div class="group-label">Persistance</div></div>
-    <div class="group-box" id="group-cloudflare"><div class="group-label">Cloudflare</div></div>
     <div class="group-box" id="group-github"><div class="group-label">GitHub</div></div>
 
     <!-- Nodes -->
@@ -438,6 +436,7 @@
     </div>
 
     <svg class="connections" id="svg-connections"></svg>
+  </div>
   </div>
 
   <div class="sim-step-label" id="sim-label"><span class="step-num"></span><span class="step-text"></span></div>
@@ -898,8 +897,7 @@
       'group-frontend': { nodes: ['n-react', 'n-vercel', 'n-status'], padTop: 25, padBottom: 10 },
       'group-backend': { nodes: ['n-node', 'n-railway'], padTop: 25, padBottom: 10 },
       'group-local': { nodes: ['n-dev', 'n-local-react', 'n-local-node', 'n-local-db', 'n-local-status'], padTop: 15, padBottom: 20 },
-      'group-data': { nodes: ['n-postgres'], padTop: 25, padBottom: 10 },
-      'group-cloudflare': { nodes: ['n-r2'], padTop: 25, padBottom: 10 },
+      'group-data': { nodes: ['n-postgres', 'n-r2'], padTop: 25, padBottom: 10 },
       'group-github': { nodes: ['n-github', 'n-actions'], padTop: 25, padBottom: 10 },
     };
 
@@ -944,12 +942,31 @@
     initPositions();
     drawConnections();
 
+    // Auto-scale diagram to fit viewport
+    function scaleDiagram() {
+      const wrapper = document.getElementById('diagram-wrapper');
+      const diagram = document.getElementById('diagram');
+      const availableWidth = wrapper.clientWidth;
+      const diagramWidth = 1100;
+      const diagramHeight = 700;
+      const scale = Math.min(1, (availableWidth / diagramWidth) * 1.05);
+      const scaledWidth = diagramWidth * scale;
+      const offsetX = Math.max(0, (availableWidth - scaledWidth) / 2) - 10;
+      diagram.style.transformOrigin = 'top left';
+      diagram.style.transform = `translate(${offsetX}px, 0) scale(${scale})`;
+      wrapper.style.height = `${diagramHeight * scale}px`;
+    }
+
     window.addEventListener('resize', () => {
       const saved = loadPositions();
       if (saved) applyPositions(saved);
       else applyPositions(defaultPositions);
       drawConnections();
+      scaleDiagram();
     });
+
+    // Init scale
+    scaleDiagram();
   </script>
 </body>
 </html>
