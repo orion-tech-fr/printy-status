@@ -329,7 +329,6 @@
   <header>
     <div class="header-btns">
       <a href="index.html" class="hdr-btn">← Status</a>
-      <button class="hdr-btn" id="btn-reset" title="Reinitialiser les positions">Reset</button>
       <button class="hdr-btn" id="btn-simulate" title="Simuler un git push">▶ Simuler un commit</button>
     </div>
     <h1>Printy Architecture</h1>
@@ -360,12 +359,12 @@
     </div>
 
     <div class="node cat-local" id="n-local-react">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="2.5" fill="currentColor"/><ellipse cx="12" cy="12" rx="11" ry="4.5"/><ellipse cx="12" cy="12" rx="11" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="11" ry="4.5" transform="rotate(120 12 12)"/></svg></div>
       <div class="node-text"><h3>React (local)</h3><span>localhost:5173</span></div>
     </div>
 
     <div class="node cat-local" id="n-local-node">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.46 1.69.46 1.38 0 2.17-.84 2.17-2.3V8.55c0-.12-.09-.21-.21-.21h-.93c-.12 0-.22.09-.22.21v8.38c0 .65-.67 1.3-1.77.75L4.4 16.6a.26.26 0 01-.12-.21V7.81c0-.09.05-.17.12-.21l7.44-4.29c.07-.04.16-.04.23 0l7.43 4.29c.07.04.12.12.12.21v8.58c0 .08-.05.17-.12.21l-7.43 4.29c-.07.04-.15.04-.23 0l-1.89-1.12c-.06-.03-.13-.04-.2-.01-.54.24-.65.28-1.16.42-.12.04-.32.1.07.28l2.48 1.47c.24.13.5.2.78.2s.54-.07.78-.2l7.44-4.29c.48-.28.78-.8.78-1.36V7.71c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.5-.2-.78-.2z"/></svg></div>
       <div class="node-text"><h3>Express (local)</h3><span>localhost:3001</span></div>
     </div>
 
@@ -380,22 +379,22 @@
     </div>
 
     <div class="node cat-git" id="n-github">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 00-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 004 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></div>
       <div class="node-text"><h3>GitHub</h3><span>1 repo, 3 projets</span></div>
     </div>
 
     <div class="node cat-ci" id="n-actions">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4"/><path d="M12 19v4"/><path d="M4.22 4.22l2.83 2.83"/><path d="M16.95 16.95l2.83 2.83"/><path d="M1 12h4"/><path d="M19 12h4"/><path d="M4.22 19.78l2.83-2.83"/><path d="M16.95 7.05l2.83-2.83"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10.854 0C7.147 0 4.135 3.012 4.135 6.718c0 .636.088 1.25.253 1.832L.163 12.776a.558.558 0 000 .789l2.07 2.07a.558.558 0 00.79 0l1.07-1.07 1.349 1.349-1.07 1.07a.558.558 0 000 .789l2.07 2.07a.558.558 0 00.79 0l4.226-4.225a6.692 6.692 0 001.832.253c3.706 0 6.718-3.012 6.718-6.718S14.56 0 10.854 0zm0 10.281a3.563 3.563 0 110-7.126 3.563 3.563 0 010 7.126z"/></svg></div>
       <div class="node-text"><h3>GitHub Actions</h3><span>CI/CD pipelines</span></div>
     </div>
 
     <div class="node cat-code" id="n-react">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="2.5" fill="currentColor"/><ellipse cx="12" cy="12" rx="11" ry="4.5"/><ellipse cx="12" cy="12" rx="11" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="11" ry="4.5" transform="rotate(120 12 12)"/></svg></div>
       <div class="node-text"><h3>React + Vite</h3><span>Frontend SPA</span></div>
     </div>
 
     <div class="node cat-code" id="n-node">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.46 1.69.46 1.38 0 2.17-.84 2.17-2.3V8.55c0-.12-.09-.21-.21-.21h-.93c-.12 0-.22.09-.22.21v8.38c0 .65-.67 1.3-1.77.75L4.4 16.6a.26.26 0 01-.12-.21V7.81c0-.09.05-.17.12-.21l7.44-4.29c.07-.04.16-.04.23 0l7.43 4.29c.07.04.12.12.12.21v8.58c0 .08-.05.17-.12.21l-7.43 4.29c-.07.04-.15.04-.23 0l-1.89-1.12c-.06-.03-.13-.04-.2-.01-.54.24-.65.28-1.16.42-.12.04-.32.1.07.28l2.48 1.47c.24.13.5.2.78.2s.54-.07.78-.2l7.44-4.29c.48-.28.78-.8.78-1.36V7.71c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.5-.2-.78-.2z"/></svg></div>
       <div class="node-text"><h3>Express + Prisma</h3><span>Backend API</span></div>
     </div>
 
@@ -405,7 +404,7 @@
     </div>
 
     <div class="node cat-host" id="n-railway">
-      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M5 18h14"/><path d="M5 6h14"/><path d="M3 21l4-4"/><path d="M17 3l4 4"/><path d="M3 3l18 18"/></svg></div>
+      <div class="node-icon"><svg viewBox="0 0 1024 1024" width="18" height="18" fill="currentColor"><path d="M4.756 438.175A520.713 520.713 0 000 489.735h777.799c-2.716-5.306-6.365-10.09-10.045-14.772-132.97-171.791-204.498-156.896-306.819-161.26-34.114-1.403-57.249-1.967-193.037-1.967-72.677 0-151.688.185-228.628.39-9.96 26.884-19.566 52.942-24.243 74.14h398.571v51.909H4.756Z"/><path d="M783.93 541.696H.399c.82 13.851 2.112 27.517 3.978 40.999h723.39c32.248 0 50.299-18.297 56.162-40.999ZM511.454 0C319.953 0 153.311 105.16 65.31 260.612c68.771-.144 202.704-.226 202.704-.226h.031v-.051c158.309 0 164.193.707 195.118 1.998l19.149.706c66.7 2.224 148.683 9.384 213.19 58.19 35.015 26.471 85.571 84.896 115.708 126.52 27.861 38.499 35.876 82.756 16.933 125.158-17.436 38.97-54.952 62.215-100.383 62.215H16.69s4.233 17.944 10.58 37.751h970.632A510.385 510.385 0 001024 512.218C1024.01 229.355 794.532 0 511.454 0Z"/></svg></div>
       <div class="node-text"><h3>Railway</h3><span>Docker Container</span></div>
     </div>
 
@@ -520,15 +519,6 @@
       applyPositions(saved || defaultPositions);
     }
 
-    // Reset button
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(LABEL_STORAGE_KEY);
-      labelOffsets = {};
-      applyPositions(defaultPositions);
-      drawConnections();
-      showToast('Positions reinitalisees');
-    });
 
     // Drag & Drop
     let dragNode = null;
