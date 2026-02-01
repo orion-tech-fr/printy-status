@@ -546,13 +546,18 @@
       editMode = !editMode;
       document.body.classList.toggle('edit-mode', editMode);
       const btn = document.getElementById('btn-edit');
+      const wrapper = document.getElementById('diagram-wrapper');
       if (editMode) {
         btn.classList.add('active');
         btn.textContent = '✏ Editer (ON)';
+        wrapper.style.overflow = 'hidden';
+        wrapper.style.touchAction = 'none';
         showToast('Mode edition active');
       } else {
         btn.classList.remove('active');
         btn.textContent = '✏ Editer';
+        wrapper.style.overflow = 'auto';
+        wrapper.style.touchAction = '';
         savePositions();
         saveLabelOffsets();
         showToast('Positions sauvegardees');
@@ -578,13 +583,14 @@
       // Touch support
       node.addEventListener('touchstart', (e) => {
         if (!editMode) return;
+        e.preventDefault();
         const touch = e.touches[0];
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
         dragOffsetX = touch.clientX - rect.left;
         dragOffsetY = touch.clientY - rect.top;
-      }, { passive: true });
+      }, { passive: false });
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -594,9 +600,10 @@
 
     document.addEventListener('touchmove', (e) => {
       if (!dragNode) return;
+      e.preventDefault();
       const touch = e.touches[0];
       moveNode(touch.clientX, touch.clientY);
-    }, { passive: true });
+    }, { passive: false });
 
     function moveNode(clientX, clientY) {
       const diagram = document.getElementById('diagram');
