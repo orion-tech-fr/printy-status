@@ -945,9 +945,9 @@
       const availableWidth = wrapper.clientWidth;
       const diagramWidth = 1100;
       const diagramHeight = 700;
-      currentScale = Math.min(1, (availableWidth / diagramWidth) * 1.05);
+      currentScale = Math.min(1, availableWidth / diagramWidth);
       const scaledWidth = diagramWidth * currentScale;
-      const offsetX = Math.max(0, (availableWidth - scaledWidth) / 2) - 10;
+      const offsetX = (availableWidth - scaledWidth) / 2;
       diagram.style.transformOrigin = 'top left';
       diagram.style.transform = `translate(${offsetX}px, 0) scale(${currentScale})`;
       wrapper.style.height = `${diagramHeight * currentScale}px`;
