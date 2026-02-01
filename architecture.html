@@ -941,9 +941,6 @@
     drawConnections();
 
     window.addEventListener('resize', () => {
-      const saved = loadPositions();
-      if (saved) applyPositions(saved);
-      else applyPositions(defaultPositions);
       drawConnections();
     });
   </script>
