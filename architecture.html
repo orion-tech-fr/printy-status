@@ -560,8 +560,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
+        dragOffsetX = (e.clientX - rect.left) / currentScale;
+        dragOffsetY = (e.clientY - rect.top) / currentScale;
       });
 
       // Touch support
@@ -571,8 +571,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = touch.clientX - rect.left;
-        dragOffsetY = touch.clientY - rect.top;
+        dragOffsetX = (touch.clientX - rect.left) / currentScale;
+        dragOffsetY = (touch.clientY - rect.top) / currentScale;
       }, { passive: true });
     });
 
@@ -590,12 +590,13 @@
     function moveNode(clientX, clientY) {
       const diagram = document.getElementById('diagram');
       const dRect = diagram.getBoundingClientRect();
-      let x = clientX - dRect.left - dragOffsetX;
-      let y = clientY - dRect.top - dragOffsetY;
+      // Compenser le CSS transform scale
+      let x = (clientX - dRect.left) / currentScale - dragOffsetX;
+      let y = (clientY - dRect.top) / currentScale - dragOffsetY;
 
-      // Clamp within diagram
-      x = Math.max(0, Math.min(x, dRect.width - dragNode.offsetWidth));
-      y = Math.max(0, Math.min(y, dRect.height - dragNode.offsetHeight));
+      // Clamp dans l'espace reel du diagram (1100x700)
+      x = Math.max(0, Math.min(x, 1100 - dragNode.offsetWidth));
+      y = Math.max(0, Math.min(y, 700 - dragNode.offsetHeight));
 
       dragNode.style.left = `${x}px`;
       dragNode.style.top = `${y}px`;
@@ -625,14 +626,14 @@
       e.stopPropagation();
       dragLabel = target;
       dragLabel.classList.add('dragging');
-      labelDragStartX = e.clientX - parseFloat(dragLabel.getAttribute('x'));
-      labelDragStartY = e.clientY - parseFloat(dragLabel.getAttribute('y'));
+      labelDragStartX = e.clientX / currentScale - parseFloat(dragLabel.getAttribute('x'));
+      labelDragStartY = e.clientY / currentScale - parseFloat(dragLabel.getAttribute('y'));
     });
 
     document.addEventListener('mousemove', (e) => {
       if (!dragLabel) return;
-      const newX = e.clientX - labelDragStartX;
-      const newY = e.clientY - labelDragStartY;
+      const newX = e.clientX / currentScale - labelDragStartX;
+      const newY = e.clientY / currentScale - labelDragStartY;
       dragLabel.setAttribute('x', newX);
       dragLabel.setAttribute('y', newY);
     });
@@ -679,12 +680,9 @@
 
     function getNodeCenter(id) {
       const el = document.getElementById(id);
-      const diagram = document.getElementById('diagram');
-      const dRect = diagram.getBoundingClientRect();
-      const rect = el.getBoundingClientRect();
       return {
-        x: rect.left - dRect.left + rect.width / 2,
-        y: rect.top - dRect.top + rect.height / 2,
+        x: el.offsetLeft + el.offsetWidth / 2,
+        y: el.offsetTop + el.offsetHeight / 2,
       };
     }
 
@@ -902,8 +900,6 @@
     };
 
     function updateGroupBoxes() {
-      const diagram = document.getElementById('diagram');
-      const dRect = diagram.getBoundingClientRect();
       const pad = 15;
 
       Object.entries(groups).forEach(([groupId, group]) => {
@@ -913,13 +909,12 @@
         group.nodes.forEach(nid => {
           const el = document.getElementById(nid);
           if (!el) return;
-          const r = el.getBoundingClientRect();
-          const x = r.left - dRect.left;
-          const y = r.top - dRect.top;
+          const x = el.offsetLeft;
+          const y = el.offsetTop;
           minX = Math.min(minX, x);
           minY = Math.min(minY, y);
-          maxX = Math.max(maxX, x + r.width);
-          maxY = Math.max(maxY, y + r.height);
+          maxX = Math.max(maxX, x + el.offsetWidth);
+          maxY = Math.max(maxY, y + el.offsetHeight);
         });
 
         const pt = group.padTop || pad;
@@ -943,18 +938,19 @@
     drawConnections();
 
     // Auto-scale diagram to fit viewport
+    let currentScale = 1;
     function scaleDiagram() {
       const wrapper = document.getElementById('diagram-wrapper');
       const diagram = document.getElementById('diagram');
       const availableWidth = wrapper.clientWidth;
       const diagramWidth = 1100;
       const diagramHeight = 700;
-      const scale = Math.min(1, (availableWidth / diagramWidth) * 1.05);
-      const scaledWidth = diagramWidth * scale;
+      currentScale = Math.min(1, (availableWidth / diagramWidth) * 1.05);
+      const scaledWidth = diagramWidth * currentScale;
       const offsetX = Math.max(0, (availableWidth - scaledWidth) / 2) - 10;
       diagram.style.transformOrigin = 'top left';
-      diagram.style.transform = `translate(${offsetX}px, 0) scale(${scale})`;
-      wrapper.style.height = `${diagramHeight * scale}px`;
+      diagram.style.transform = `translate(${offsetX}px, 0) scale(${currentScale})`;
+      wrapper.style.height = `${diagramHeight * currentScale}px`;
     }
 
     window.addEventListener('resize', () => {
