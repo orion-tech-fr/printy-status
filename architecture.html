@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.3">
   <title>Printy Architecture</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='60' width='70' height='30' rx='3' fill='%233b82f6'/><rect x='25' y='35' width='50' height='25' rx='2' fill='%233b82f6' opacity='0.8'/><rect x='35' y='15' width='30' height='20' rx='2' fill='%233b82f6' opacity='0.6'/></svg>">
   <style>
@@ -33,8 +33,9 @@
     }
 
     .diagram-wrapper {
-      overflow: hidden;
+      overflow: auto;
       width: 100%;
+      -webkit-overflow-scrolling: touch;
     }
 
     .hdr-btn {
@@ -560,8 +561,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = (e.clientX - rect.left) / currentScale;
-        dragOffsetY = (e.clientY - rect.top) / currentScale;
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
       });
 
       // Touch support
@@ -571,8 +572,8 @@
         dragNode = node;
         node.classList.add('dragging');
         const rect = node.getBoundingClientRect();
-        dragOffsetX = (touch.clientX - rect.left) / currentScale;
-        dragOffsetY = (touch.clientY - rect.top) / currentScale;
+        dragOffsetX = touch.clientX - rect.left;
+        dragOffsetY = touch.clientY - rect.top;
       }, { passive: true });
     });
 
@@ -590,13 +591,11 @@
     function moveNode(clientX, clientY) {
       const diagram = document.getElementById('diagram');
       const dRect = diagram.getBoundingClientRect();
-      // Compenser le CSS transform scale
-      let x = (clientX - dRect.left) / currentScale - dragOffsetX;
-      let y = (clientY - dRect.top) / currentScale - dragOffsetY;
+      let x = clientX - dRect.left - dragOffsetX;
+      let y = clientY - dRect.top - dragOffsetY;
 
-      // Clamp dans l'espace reel du diagram (1100x700)
-      x = Math.max(0, Math.min(x, 1100 - dragNode.offsetWidth));
-      y = Math.max(0, Math.min(y, 700 - dragNode.offsetHeight));
+      x = Math.max(0, Math.min(x, dRect.width - dragNode.offsetWidth));
+      y = Math.max(0, Math.min(y, dRect.height - dragNode.offsetHeight));
 
       dragNode.style.left = `${x}px`;
       dragNode.style.top = `${y}px`;
@@ -626,14 +625,14 @@
       e.stopPropagation();
       dragLabel = target;
       dragLabel.classList.add('dragging');
-      labelDragStartX = e.clientX / currentScale - parseFloat(dragLabel.getAttribute('x'));
-      labelDragStartY = e.clientY / currentScale - parseFloat(dragLabel.getAttribute('y'));
+      labelDragStartX = e.clientX - parseFloat(dragLabel.getAttribute('x'));
+      labelDragStartY = e.clientY - parseFloat(dragLabel.getAttribute('y'));
     });
 
     document.addEventListener('mousemove', (e) => {
       if (!dragLabel) return;
-      const newX = e.clientX / currentScale - labelDragStartX;
-      const newY = e.clientY / currentScale - labelDragStartY;
+      const newX = e.clientX - labelDragStartX;
+      const newY = e.clientY - labelDragStartY;
       dragLabel.setAttribute('x', newX);
       dragLabel.setAttribute('y', newY);
     });
@@ -937,32 +936,12 @@
     initPositions();
     drawConnections();
 
-    // Auto-scale diagram to fit viewport
-    let currentScale = 1;
-    function scaleDiagram() {
-      const wrapper = document.getElementById('diagram-wrapper');
-      const diagram = document.getElementById('diagram');
-      const availableWidth = wrapper.clientWidth;
-      const diagramWidth = 1100;
-      const diagramHeight = 700;
-      currentScale = Math.min(1, availableWidth / diagramWidth);
-      const scaledWidth = diagramWidth * currentScale;
-      const offsetX = (availableWidth - scaledWidth) / 2;
-      diagram.style.transformOrigin = 'top left';
-      diagram.style.transform = `translate(${offsetX}px, 0) scale(${currentScale})`;
-      wrapper.style.height = `${diagramHeight * currentScale}px`;
-    }
-
     window.addEventListener('resize', () => {
       const saved = loadPositions();
       if (saved) applyPositions(saved);
       else applyPositions(defaultPositions);
       drawConnections();
-      scaleDiagram();
     });
-
-    // Init scale
-    scaleDiagram();
   </script>
 </body>
 </html>
