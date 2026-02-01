@@ -727,10 +727,6 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Type</span>
-            <span>Railway PostgreSQL</span>
-          </div>
-          <div class="detail-row">
             <span class="detail-label">Status</span>
             <span id="database-status">-</span>
           </div>
@@ -740,15 +736,15 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">MAJ</span>
-            <span id="database-migration">-</span>
+            <span id="database-migration" style="font-size: 0.8rem;">-</span>
           </div>
           <div class="detail-row" style="flex-direction: column; gap: 0.3rem;">
-            <span class="detail-label">Tables</span>
+            <span class="detail-label">Tables <span id="database-tables-count" style="color: #22c55e; font-weight: 600; font-size: 0.8rem;"></span></span>
             <div class="table-wrapper">
               <div id="database-tables" class="table-list">-</div>
-              <div id="database-tables-total" class="table-total"></div>
             </div>
           </div>
+          <div id="database-recent-activity" class="hidden" style="display: none; flex-wrap: wrap; gap: 0.3rem 0.75rem; padding: 0.3rem 0; font-size: 0.75rem;"></div>
           <div id="database-error-box" class="error-box hidden">
             <div class="error-message" id="database-error-message"></div>
           </div>
@@ -828,8 +824,6 @@
         </div>
       </div>
     </div>
-
-    <div id="recent-activity" class="recent-activity hidden"></div>
 
     <div class="footer">
       <div class="last-check" id="last-check">Derniere: -</div>
@@ -1243,25 +1237,26 @@
                 }
 
                 if (schema.tables) {
+                  const tableCount = Object.keys(schema.tables).length;
                   const total = Object.values(schema.tables).reduce((s, c) => s + c, 0);
+                  document.getElementById('database-tables-count').textContent = `(${tableCount}) - ${total} rows`;
                   tablesEl.innerHTML = Object.entries(schema.tables)
                     .map(([key, count]) => `<div class="table-item"><span class="table-name">${TABLE_NAMES[key] || key}</span><span class="table-count">${count}</span></div>`)
                     .join('');
-                  const totalEl = document.getElementById('database-tables-total');
-                  totalEl.innerHTML = `<span class="table-name">Total (${Object.keys(schema.tables).length} tables)</span><span class="table-count">${total}</span>`;
                 }
 
                 // Activite recente
                 if (schema.recentActivity && schema.recentActivity.length > 0) {
-                  const activityEl = document.getElementById('recent-activity');
+                  const activityEl = document.getElementById('database-recent-activity');
                   activityEl.classList.remove('hidden');
+                  activityEl.style.display = 'flex';
                   activityEl.innerHTML = schema.recentActivity.map(item => {
                     const name = TABLE_NAMES[item.key] || item.key;
                     const time = new Date(item.lastAt).toLocaleString('fr-FR', {
                       day: '2-digit', month: '2-digit',
                       hour: '2-digit', minute: '2-digit',
                     });
-                    return `<span class="recent-item">${name} : <span class="recent-badge">+${item.count}</span> <span class="recent-time">${time}</span></span>`;
+                    return `<span style="color: #94a3b8;">${name} <span style="color: #22c55e; font-weight: 600;">+${item.count}</span> <span style="color: #475569; font-size: 0.65rem;">${time}</span></span>`;
                   }).join('');
                 }
               }
