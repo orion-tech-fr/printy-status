@@ -75,8 +75,7 @@
       width: 1100px;
       height: 700px;
       padding: 0 1rem;
-      margin: 0 auto;
-      transform-origin: top center;
+      transform-origin: top left;
     }
 
     svg.connections {
@@ -945,7 +944,8 @@
       const diagram = document.getElementById('diagram');
       const availableWidth = wrapper.clientWidth;
       currentScale = Math.min(1, availableWidth / 1100);
-      diagram.style.transform = `scale(${currentScale})`;
+      const offsetX = (availableWidth - 1100 * currentScale) / 2;
+      diagram.style.transform = `translate(${offsetX}px, 0) scale(${currentScale})`;
       wrapper.style.height = `${700 * currentScale}px`;
     }
 
