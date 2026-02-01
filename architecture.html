@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Printy Architecture</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='60' width='70' height='30' rx='3' fill='%233b82f6'/><rect x='25' y='35' width='50' height='25' rx='2' fill='%233b82f6' opacity='0.8'/><rect x='35' y='15' width='30' height='20' rx='2' fill='%233b82f6' opacity='0.6'/></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem;
+      position: relative;
+    }
+
+    h1 { font-size: 1.5rem; font-weight: 600; }
+
+    .header-btns {
+      position: absolute;
+      left: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .hdr-btn {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .hdr-btn:hover { background: #334155; color: #e2e8f0; }
+    .hdr-btn.active { background: #334155; color: #f59e0b; border-color: #f59e0b; }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 0 1rem 0.5rem;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .diagram {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      height: 700px;
+      padding: 0 1rem;
+    }
+
+    svg.connections {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .node {
+      position: absolute;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 2;
+      cursor: grab;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .node:hover {
+      border-color: #64748b;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+    .node.dragging {
+      cursor: grabbing;
+      z-index: 20;
+      box-shadow: 0 0 30px rgba(59,130,246,0.3);
+      border-color: #3b82f6;
+    }
+    .node-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .node-text h3 { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+    .node-text span { font-size: 0.65rem; color: #64748b; }
+
+    /* Category colors */
+    .cat-user .node-icon { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+    .cat-user {
+      border: 2px solid rgba(99,102,241,0.5);
+      background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%);
+      box-shadow: 0 0 30px rgba(99,102,241,0.25), 0 0 60px rgba(99,102,241,0.08);
+      padding: 0.8rem 1.2rem;
+      animation: user-glow 3s ease-in-out infinite;
+    }
+    @keyframes user-glow {
+      0%, 100% { box-shadow: 0 0 25px rgba(99,102,241,0.2), 0 0 50px rgba(99,102,241,0.05); }
+      50% { box-shadow: 0 0 35px rgba(99,102,241,0.35), 0 0 70px rgba(99,102,241,0.12); }
+    }
+    .cat-user .node-icon {
+      width: 42px;
+      height: 42px;
+      font-size: 1.4rem;
+      border-radius: 50%;
+      border: 2px solid rgba(99,102,241,0.4);
+    }
+    .cat-user .node-text h3 { font-size: 1.05rem; color: #c7d2fe; }
+    .cat-user .node-text span { font-size: 0.75rem; color: #818cf8; }
+
+    .cat-git .node-icon { background: rgba(148,163,184,0.2); color: #e2e8f0; }
+    .cat-git { border-color: rgba(148,163,184,0.3); }
+
+    .cat-ci .node-icon { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .cat-ci { border-color: rgba(245,158,11,0.3); }
+
+    .cat-code .node-icon { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .cat-code { border-color: rgba(59,130,246,0.3); }
+
+    .cat-host .node-icon { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .cat-host { border-color: rgba(34,197,94,0.3); }
+
+    .cat-data .node-icon { background: rgba(167,139,250,0.2); color: #a78bfa; }
+    .cat-data { border-color: rgba(167,139,250,0.3); }
+
+    .cat-monitor .node-icon { background: rgba(236,72,153,0.2); color: #ec4899; }
+    .cat-monitor { border-color: rgba(236,72,153,0.3); }
+
+    .cat-local .node-icon { background: rgba(14,165,233,0.2); color: #0ea5e9; }
+    .cat-local { border-color: rgba(14,165,233,0.3); }
+
+    .group-box {
+      position: absolute;
+      border: 1px dashed rgba(100,116,139,0.3);
+      border-radius: 14px;
+      background: rgba(30,41,59,0.3);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .group-box .group-label {
+      position: absolute;
+      top: 6px;
+      left: 12px;
+      font-size: 0.6rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Animated connections */
+    .conn-line {
+      fill: none;
+      stroke-width: 1.5;
+      opacity: 0.4;
+    }
+    .conn-flow {
+      fill: none;
+      stroke-width: 2;
+      stroke-dasharray: 8 12;
+      animation: flow 1.5s linear infinite;
+    }
+
+    @keyframes flow {
+      to { stroke-dashoffset: -20; }
+    }
+
+    .particle {
+      r: 3;
+      opacity: 0.9;
+    }
+
+    .conn-group { transition: opacity 0.3s; }
+    .conn-group.highlight .conn-line { opacity: 0.6; }
+    .conn-group.highlight .conn-flow { opacity: 1; }
+
+    .conn-label {
+      font-size: 0.6rem;
+      fill: #475569;
+      text-anchor: middle;
+      pointer-events: all;
+      cursor: grab;
+    }
+    .conn-label:hover {
+      fill: #94a3b8;
+    }
+    .conn-label.dragging {
+      cursor: grabbing;
+      fill: #e2e8f0;
+    }
+
+    /* Simulation */
+    .sim-active .conn-group { opacity: 0.05 !important; }
+    .sim-active .conn-group.sim-done .conn-line { opacity: 0.5; }
+    .sim-active .conn-group.sim-done .conn-flow { opacity: 0.7; }
+    .sim-active .conn-group.sim-current .conn-line { opacity: 0.8; }
+    .sim-active .conn-group.sim-current .conn-flow { opacity: 1; stroke-width: 3; }
+    .sim-active .conn-group.sim-current { opacity: 1 !important; }
+    .sim-active .conn-group.sim-done { opacity: 1 !important; }
+
+    .node.sim-highlight {
+      box-shadow: 0 0 25px rgba(59,130,246,0.5);
+      border-color: #3b82f6 !important;
+      z-index: 15;
+    }
+
+    .sim-pulse {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 30;
+      animation: sim-ping 0.6s ease-out forwards;
+    }
+
+    @keyframes sim-ping {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(4); opacity: 0; }
+    }
+
+    .sim-step-label {
+      position: fixed;
+      top: 4.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30,41,59,0.95);
+      border: 1px solid #334155;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      z-index: 50;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .sim-step-label.show { opacity: 1; }
+
+    .sim-step-label .step-num {
+      color: #3b82f6;
+      font-weight: 700;
+      margin-right: 0.4rem;
+    }
+
+    .hdr-btn.sim-running {
+      background: #334155;
+      color: #f59e0b;
+      border-color: #f59e0b;
+      animation: pulse-btn 1.5s infinite;
+    }
+
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+      50% { box-shadow: 0 0 12px 2px rgba(245,158,11,0.3); }
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: #22c55e;
+      border: 1px solid #334155;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .diagram { height: 1100px; }
+      .node { padding: 0.4rem 0.6rem; }
+      .node-icon { width: 24px; height: 24px; font-size: 0.8rem; }
+      .node-text h3 { font-size: 0.75rem; }
+      .node-text span { font-size: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-btns">
+      <a href="index.html" class="hdr-btn">← Status</a>
+      <button class="hdr-btn" id="btn-reset" title="Reinitialiser les positions">Reset</button>
+      <button class="hdr-btn" id="btn-simulate" title="Simuler un git push">▶ Simuler un commit</button>
+    </div>
+    <h1>Printy Architecture</h1>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Utilisateur / Git</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>CI/CD</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Code</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Hosting</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Donnees</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Dev local</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Monitoring</div>
+  </div>
+
+  <div class="diagram" id="diagram">
+    <!-- Group boxes -->
+    <div class="group-box" id="group-frontend"><div class="group-label">Frontend</div></div>
+    <div class="group-box" id="group-backend"><div class="group-label">Backend</div></div>
+    <div class="group-box" id="group-local"><div class="group-label">Dev local</div></div>
+    <div class="group-box" id="group-data"><div class="group-label">Persistance</div></div>
+    <div class="group-box" id="group-github"><div class="group-label">GitHub</div></div>
+
+    <!-- Nodes -->
+    <div class="node cat-user" id="n-dev">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div class="node-text"><h3>Developpeur</h3><span>Code & Deploy</span></div>
+    </div>
+
+    <div class="node cat-local" id="n-local-react">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>
+      <div class="node-text"><h3>React (local)</h3><span>localhost:5173</span></div>
+    </div>
+
+    <div class="node cat-local" id="n-local-node">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></svg></div>
+      <div class="node-text"><h3>Express (local)</h3><span>localhost:3001</span></div>
+    </div>
+
+    <div class="node cat-local" id="n-local-db">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div>
+      <div class="node-text"><h3>SQLite</h3><span>dev.db local</span></div>
+    </div>
+
+    <div class="node cat-local" id="n-local-status">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+      <div class="node-text"><h3>Printy Status (local)</h3><span>fichier HTML</span></div>
+    </div>
+
+    <div class="node cat-git" id="n-github">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 00-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 004 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></div>
+      <div class="node-text"><h3>GitHub</h3><span>1 repo, 3 projets</span></div>
+    </div>
+
+    <div class="node cat-ci" id="n-actions">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4"/><path d="M12 19v4"/><path d="M4.22 4.22l2.83 2.83"/><path d="M16.95 16.95l2.83 2.83"/><path d="M1 12h4"/><path d="M19 12h4"/><path d="M4.22 19.78l2.83-2.83"/><path d="M16.95 7.05l2.83-2.83"/></svg></div>
+      <div class="node-text"><h3>GitHub Actions</h3><span>CI/CD pipelines</span></div>
+    </div>
+
+    <div class="node cat-code" id="n-react">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg></div>
+      <div class="node-text"><h3>React + Vite</h3><span>Frontend SPA</span></div>
+    </div>
+
+    <div class="node cat-code" id="n-node">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg></div>
+      <div class="node-text"><h3>Express + Prisma</h3><span>Backend API</span></div>
+    </div>
+
+    <div class="node cat-host" id="n-vercel">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 22h20L12 2z"/></svg></div>
+      <div class="node-text"><h3>Vercel</h3><span>CDN Edge Global</span></div>
+    </div>
+
+    <div class="node cat-host" id="n-railway">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M5 18h14"/><path d="M5 6h14"/><path d="M3 21l4-4"/><path d="M17 3l4 4"/><path d="M3 3l18 18"/></svg></div>
+      <div class="node-text"><h3>Railway</h3><span>Docker Container</span></div>
+    </div>
+
+    <div class="node cat-user" id="n-user">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+      <div class="node-text"><h3>Utilisateurs</h3><span>Navigateur Web</span></div>
+    </div>
+
+    <div class="node cat-data" id="n-postgres">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div>
+      <div class="node-text"><h3>PostgreSQL</h3><span>Railway Database</span></div>
+    </div>
+
+    <div class="node cat-data" id="n-r2">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 110-14h.5"/><path d="M9.5 5a5.5 5.5 0 018 4.764A4.5 4.5 0 0118 19h-.5"/></svg></div>
+      <div class="node-text"><h3>Cloudflare R2</h3><span>Fichiers / STL / Avatars</span></div>
+    </div>
+
+    <div class="node cat-monitor" id="n-status">
+      <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <div class="node-text"><h3>Printy Status</h3><span>Monitoring</span></div>
+    </div>
+
+    <svg class="connections" id="svg-connections"></svg>
+  </div>
+
+  <div class="sim-step-label" id="sim-label"><span class="step-num"></span><span class="step-text"></span></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Default positions (percentage of diagram size)
+    const defaultPositions = {
+      'n-dev':         { x: 42, y: 0 },
+      'n-local-react': { x: 2,  y: 5 },
+      'n-local-node':  { x: 2,  y: 18 },
+      'n-local-db':    { x: 2,  y: 31 },
+      'n-local-status':{ x: 2,  y: 44 },
+      'n-github':      { x: 38, y: 14 },
+      'n-actions':     { x: 62, y: 14 },
+      'n-react':       { x: 25, y: 30 },
+      'n-node':        { x: 62, y: 30 },
+      'n-vercel':      { x: 18, y: 48 },
+      'n-railway':     { x: 62, y: 48 },
+      'n-user':        { x: 18, y: 68 },
+      'n-postgres':    { x: 62, y: 68 },
+      'n-r2':          { x: 40, y: 84 },
+      'n-status':      { x: 40, y: 55 },
+    };
+
+    const STORAGE_KEY = 'printy-arch-positions';
+    const LABEL_STORAGE_KEY = 'printy-arch-label-offsets';
+
+    function loadLabelOffsets() {
+      try {
+        const saved = localStorage.getItem(LABEL_STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch {}
+      return {};
+    }
+
+    function saveLabelOffsets() {
+      localStorage.setItem(LABEL_STORAGE_KEY, JSON.stringify(labelOffsets));
+    }
+
+    let labelOffsets = loadLabelOffsets();
+
+    function loadPositions() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch {}
+      return null;
+    }
+
+    function savePositions() {
+      const positions = {};
+      document.querySelectorAll('.node').forEach(node => {
+        const diagram = document.getElementById('diagram');
+        const dw = diagram.offsetWidth;
+        const dh = diagram.offsetHeight;
+        positions[node.id] = {
+          x: (parseFloat(node.style.left) / dw) * 100,
+          y: (parseFloat(node.style.top) / dh) * 100,
+        };
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+    }
+
+    function applyPositions(positions) {
+      const diagram = document.getElementById('diagram');
+      const dw = diagram.offsetWidth;
+      const dh = diagram.offsetHeight;
+      Object.entries(positions).forEach(([id, pos]) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.left = `${(pos.x / 100) * dw}px`;
+          el.style.top = `${(pos.y / 100) * dh}px`;
+        }
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    // Init positions
+    function initPositions() {
+      const saved = loadPositions();
+      applyPositions(saved || defaultPositions);
+    }
+
+    // Reset button
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LABEL_STORAGE_KEY);
+      labelOffsets = {};
+      applyPositions(defaultPositions);
+      drawConnections();
+      showToast('Positions reinitalisees');
+    });
+
+    // Drag & Drop
+    let dragNode = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    document.querySelectorAll('.node').forEach(node => {
+      node.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        dragNode = node;
+        node.classList.add('dragging');
+        const rect = node.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+      });
+
+      // Touch support
+      node.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        dragNode = node;
+        node.classList.add('dragging');
+        const rect = node.getBoundingClientRect();
+        dragOffsetX = touch.clientX - rect.left;
+        dragOffsetY = touch.clientY - rect.top;
+      }, { passive: true });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragNode) return;
+      moveNode(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!dragNode) return;
+      const touch = e.touches[0];
+      moveNode(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    function moveNode(clientX, clientY) {
+      const diagram = document.getElementById('diagram');
+      const dRect = diagram.getBoundingClientRect();
+      let x = clientX - dRect.left - dragOffsetX;
+      let y = clientY - dRect.top - dragOffsetY;
+
+      // Clamp within diagram
+      x = Math.max(0, Math.min(x, dRect.width - dragNode.offsetWidth));
+      y = Math.max(0, Math.min(y, dRect.height - dragNode.offsetHeight));
+
+      dragNode.style.left = `${x}px`;
+      dragNode.style.top = `${y}px`;
+      drawConnections();
+    }
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    function endDrag() {
+      if (!dragNode) return;
+      dragNode.classList.remove('dragging');
+      dragNode = null;
+      savePositions();
+      showToast('Position sauvegardee');
+    }
+
+    // Label drag
+    let dragLabel = null;
+    let labelDragStartX = 0;
+    let labelDragStartY = 0;
+
+    document.getElementById('svg-connections').addEventListener('mousedown', (e) => {
+      const target = e.target;
+      if (!target.classList.contains('conn-label')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragLabel = target;
+      dragLabel.classList.add('dragging');
+      labelDragStartX = e.clientX - parseFloat(dragLabel.getAttribute('x'));
+      labelDragStartY = e.clientY - parseFloat(dragLabel.getAttribute('y'));
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragLabel) return;
+      const newX = e.clientX - labelDragStartX;
+      const newY = e.clientY - labelDragStartY;
+      dragLabel.setAttribute('x', newX);
+      dragLabel.setAttribute('y', newY);
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragLabel) return;
+      const idx = dragLabel.dataset.connIndex;
+      const baseX = parseFloat(dragLabel.dataset.baseX);
+      const baseY = parseFloat(dragLabel.dataset.baseY);
+      const curX = parseFloat(dragLabel.getAttribute('x'));
+      const curY = parseFloat(dragLabel.getAttribute('y'));
+      labelOffsets[idx] = { dx: curX - baseX, dy: curY - baseY };
+      saveLabelOffsets();
+      dragLabel.classList.remove('dragging');
+      dragLabel = null;
+      showToast('Label sauvegarde');
+    });
+
+    // Connections
+    const connections = [
+      /* 0  */ { from: 'n-dev', to: 'n-github', color: '#94a3b8', label: 'git push' },
+      /* 1  */ { from: 'n-github', to: 'n-actions', color: '#f59e0b', label: 'trigger CI' },
+      /* 2  */ { from: 'n-actions', to: 'n-vercel', color: '#22c55e', label: 'deploy frontend' },
+      /* 3  */ { from: 'n-actions', to: 'n-railway', color: '#22c55e', label: 'deploy backend' },
+      /* 4  */ { from: 'n-react', to: 'n-vercel', color: '#334155', label: 'tourne sur', static: true },
+      /* 5  */ { from: 'n-node', to: 'n-railway', color: '#334155', label: 'tourne sur', static: true },
+      /* 6  */ { from: 'n-user', to: 'n-vercel', color: '#22c55e', label: 'HTTPS' },
+      /* 7  */ { from: 'n-vercel', to: 'n-railway', color: '#3b82f6', label: 'API REST' },
+      /* 8  */ { from: 'n-railway', to: 'n-postgres', color: '#a78bfa', label: 'Prisma' },
+      /* 9  */ { from: 'n-user', to: 'n-r2', color: '#a78bfa', label: 'upload fichiers', curveOffset: 5 },
+      /* 10 */ { from: 'n-r2', to: 'n-user', color: '#a78bfa', label: 'download fichiers', curveOffset: 5 },
+      /* 11 */ { from: 'n-railway', to: 'n-r2', color: '#a78bfa', label: 'presigned URLs' },
+      /* 12 */ { from: 'n-dev', to: 'n-local-react', color: '#0ea5e9', label: 'npm run dev' },
+      /* 13 */ { from: 'n-dev', to: 'n-local-node', color: '#0ea5e9', label: 'npm run dev' },
+      /* 14 */ { from: 'n-local-node', to: 'n-local-db', color: '#0ea5e9', label: 'Prisma SQLite' },
+      /* 15 */ { from: 'n-local-react', to: 'n-local-node', color: '#0ea5e9', label: 'proxy API' },
+      /* 16 */ { from: 'n-status', to: 'n-railway', color: '#ec4899', label: 'health API' },
+      /* 17 */ { from: 'n-status', to: 'n-vercel', color: '#ec4899', label: 'health front' },
+      /* 18 */ { from: 'n-status', to: 'n-actions', color: '#ec4899', label: 'CI status' },
+      /* 19 */ { from: 'n-status', to: 'n-postgres', color: '#ec4899', label: 'health DB' },
+      /* 20 */ { from: 'n-status', to: 'n-r2', color: '#ec4899', label: 'health R2' },
+      /* 21 */ { from: 'n-status', to: 'n-vercel', color: '#334155', label: 'tourne sur', static: true },
+      /* 22 */ { from: 'n-dev', to: 'n-local-status', color: '#0ea5e9', label: 'ouvre HTML' },
+    ];
+
+    function getNodeCenter(id) {
+      const el = document.getElementById(id);
+      const diagram = document.getElementById('diagram');
+      const dRect = diagram.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      return {
+        x: rect.left - dRect.left + rect.width / 2,
+        y: rect.top - dRect.top + rect.height / 2,
+      };
+    }
+
+    function drawConnections() {
+      const svg = document.getElementById('svg-connections');
+      const diagram = document.getElementById('diagram');
+      svg.setAttribute('viewBox', `0 0 ${diagram.offsetWidth} ${diagram.offsetHeight}`);
+      svg.innerHTML = '';
+
+      connections.forEach((conn, i) => {
+        const from = getNodeCenter(conn.from);
+        const to = getNodeCenter(conn.to);
+
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const offset = conn.curveOffset || 0;
+        // Perpendicular offset for parallel connections
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len * offset;
+        const ny = dx / len * offset;
+        const cx1 = from.x + dx * 0.2 + nx;
+        const cy1 = from.y + dy * 0.5 + ny;
+        const cx2 = from.x + dx * 0.8 + nx;
+        const cy2 = from.y + dy * 0.5 + ny;
+        const pathD = `M ${from.x} ${from.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${to.x} ${to.y}`;
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.classList.add('conn-group');
+        if (conn.static) group.classList.add('conn-static');
+        group.dataset.from = conn.from;
+        group.dataset.to = conn.to;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        line.setAttribute('d', pathD);
+        line.classList.add('conn-line');
+        line.setAttribute('stroke', conn.color);
+        if (conn.static) {
+          line.setAttribute('stroke-dasharray', '4 4');
+          line.setAttribute('opacity', '0.3');
+        }
+        group.appendChild(line);
+
+        if (!conn.static) {
+          const flow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          flow.setAttribute('d', pathD);
+          flow.classList.add('conn-flow');
+          flow.setAttribute('stroke', conn.color);
+          flow.style.animationDuration = `${1 + Math.random() * 0.5}s`;
+          flow.setAttribute('id', `path-${i}`);
+          group.appendChild(flow);
+
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.classList.add('particle');
+          circle.setAttribute('fill', conn.color);
+          const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+          anim.setAttribute('dur', `${2 + Math.random() * 1.5}s`);
+          anim.setAttribute('repeatCount', 'indefinite');
+          const mpath = document.createElementNS('http://www.w3.org/2000/svg', 'mpath');
+          mpath.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `#path-${i}`);
+          anim.appendChild(mpath);
+          circle.appendChild(anim);
+          group.appendChild(circle);
+        }
+
+        const savedOffset = labelOffsets[i] || { dx: 0, dy: 0 };
+        const midX = (from.x + to.x) / 2 + nx + savedOffset.dx;
+        const midY = (from.y + to.y) / 2 - 8 + ny + savedOffset.dy;
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.classList.add('conn-label');
+        label.setAttribute('x', midX);
+        label.setAttribute('y', midY);
+        label.textContent = conn.label;
+        label.dataset.connIndex = i;
+        label.dataset.baseX = (from.x + to.x) / 2 + nx;
+        label.dataset.baseY = (from.y + to.y) / 2 - 8 + ny;
+        group.appendChild(label);
+
+        svg.appendChild(group);
+      });
+    }
+
+    // Hover highlight (only when not dragging)
+    document.querySelectorAll('.node').forEach(node => {
+      node.addEventListener('mouseenter', () => {
+        if (dragNode) return;
+        const id = node.id;
+        document.querySelectorAll('.conn-group').forEach(g => {
+          if (g.dataset.from === id || g.dataset.to === id) {
+            g.classList.add('highlight');
+          } else {
+            g.style.opacity = '0.1';
+          }
+        });
+      });
+      node.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.conn-group').forEach(g => {
+          g.classList.remove('highlight');
+          g.style.opacity = '';
+        });
+      });
+    });
+
+    // Simulation
+    const simSteps = [
+      { conn: 0,  nodes: ['n-dev', 'n-github'],      label: 'Developpeur push le code vers GitHub' },
+      { conn: 1,  nodes: ['n-github', 'n-actions'],  label: 'GitHub declenche les GitHub Actions' },
+      { conn: 2,  nodes: ['n-actions', 'n-vercel'],  label: 'GitHub Actions deploie le frontend sur Vercel' },
+      { conn: 3,  nodes: ['n-actions', 'n-railway'], label: 'GitHub Actions deploie le backend sur Railway' },
+      { conn: 8,  nodes: ['n-railway', 'n-postgres'], label: 'Prisma applique les migrations PostgreSQL' },
+      { conn: 11, nodes: ['n-railway', 'n-r2'],      label: 'Backend genere les URLs presignees R2' },
+      { conn: 6,  nodes: ['n-user', 'n-vercel'],     label: 'Utilisateurs accedent au site via Vercel' },
+      { conn: 7,  nodes: ['n-vercel', 'n-railway'],  label: 'Frontend appelle l\'API REST sur Railway' },
+      { conn: 9,  nodes: ['n-user', 'n-r2'],         label: 'Utilisateurs uploadent des fichiers vers R2' },
+      { conn: 10, nodes: ['n-r2', 'n-user'],         label: 'Utilisateurs telechargent des fichiers depuis R2' },
+      { conn: 16, nodes: ['n-status', 'n-railway'],  label: 'Printy Status monitore le backend' },
+      { conn: 17, nodes: ['n-status', 'n-vercel'],   label: 'Printy Status monitore le frontend' },
+      { conn: 19, nodes: ['n-status', 'n-postgres'], label: 'Printy Status monitore la base de donnees' },
+      { conn: 20, nodes: ['n-status', 'n-r2'],       label: 'Printy Status monitore le stockage R2' },
+      { conn: 18, nodes: ['n-status', 'n-actions'],  label: 'Printy Status verifie la CI' },
+    ];
+
+    let simRunning = false;
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function pulseNode(nodeId, color) {
+      const el = document.getElementById(nodeId);
+      const rect = el.getBoundingClientRect();
+      const pulse = document.createElement('div');
+      pulse.className = 'sim-pulse';
+      pulse.style.background = color || '#3b82f6';
+      pulse.style.left = `${rect.left + rect.width / 2 - 4}px`;
+      pulse.style.top = `${rect.top + rect.height / 2 - 4}px`;
+      document.body.appendChild(pulse);
+      setTimeout(() => pulse.remove(), 600);
+    }
+
+    async function runSimulation() {
+      if (simRunning) return;
+      simRunning = true;
+
+      const btn = document.getElementById('btn-simulate');
+      btn.classList.add('sim-running');
+      btn.textContent = '⏳ Simulation...';
+
+      const diagram = document.getElementById('diagram');
+      const label = document.getElementById('sim-label');
+      const stepNum = label.querySelector('.step-num');
+      const stepText = label.querySelector('.step-text');
+
+      // Reset all
+      diagram.classList.add('sim-active');
+      document.querySelectorAll('.conn-group').forEach(g => {
+        g.classList.remove('sim-current', 'sim-done');
+      });
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('sim-highlight'));
+
+      label.classList.add('show');
+
+      for (let i = 0; i < simSteps.length; i++) {
+        const step = simSteps[i];
+
+        // Update label
+        stepNum.textContent = `${i + 1}/${simSteps.length}`;
+        stepText.textContent = step.label;
+
+        // Highlight nodes
+        step.nodes.forEach(nid => {
+          document.getElementById(nid).classList.add('sim-highlight');
+          pulseNode(nid);
+        });
+
+        // Highlight connection
+        const groups = document.querySelectorAll('.conn-group');
+        if (groups[step.conn]) {
+          groups[step.conn].classList.add('sim-current');
+        }
+
+        await sleep(1200);
+
+        // Mark as done
+        if (groups[step.conn]) {
+          groups[step.conn].classList.remove('sim-current');
+          groups[step.conn].classList.add('sim-done');
+        }
+      }
+
+      // Final flash
+      stepNum.textContent = '✓';
+      stepText.textContent = 'Deploiement termine !';
+      await sleep(2000);
+
+      // Cleanup
+      label.classList.remove('show');
+      diagram.classList.remove('sim-active');
+      document.querySelectorAll('.conn-group').forEach(g => {
+        g.classList.remove('sim-current', 'sim-done');
+      });
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('sim-highlight'));
+
+      btn.classList.remove('sim-running');
+      btn.textContent = '▶ Simuler un commit';
+      simRunning = false;
+    }
+
+    document.getElementById('btn-simulate').addEventListener('click', runSimulation);
+
+    // Group boxes - entoure les noeuds associes
+    const groups = {
+      'group-frontend': { nodes: ['n-react', 'n-vercel', 'n-status'], padTop: 25, padBottom: 10 },
+      'group-backend': { nodes: ['n-node', 'n-railway'], padTop: 25, padBottom: 10 },
+      'group-local': { nodes: ['n-dev', 'n-local-react', 'n-local-node', 'n-local-db', 'n-local-status'], padTop: 15, padBottom: 20 },
+      'group-data': { nodes: ['n-postgres', 'n-r2'], padTop: 25, padBottom: 10 },
+      'group-github': { nodes: ['n-github', 'n-actions'], padTop: 25, padBottom: 10 },
+    };
+
+    function updateGroupBoxes() {
+      const diagram = document.getElementById('diagram');
+      const dRect = diagram.getBoundingClientRect();
+      const pad = 15;
+
+      Object.entries(groups).forEach(([groupId, group]) => {
+        const box = document.getElementById(groupId);
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+        group.nodes.forEach(nid => {
+          const el = document.getElementById(nid);
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          const x = r.left - dRect.left;
+          const y = r.top - dRect.top;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x + r.width);
+          maxY = Math.max(maxY, y + r.height);
+        });
+
+        const pt = group.padTop || pad;
+        const pb = group.padBottom || pad;
+        box.style.left = `${minX - pad}px`;
+        box.style.top = `${minY - pt}px`;
+        box.style.width = `${maxX - minX + pad * 2}px`;
+        box.style.height = `${maxY - minY + pt + pb}px`;
+      });
+    }
+
+    // Override drawConnections to also update groups
+    const _origDraw = drawConnections;
+    drawConnections = function() {
+      _origDraw();
+      updateGroupBoxes();
+    };
+
+    // Init
+    initPositions();
+    drawConnections();
+
+    window.addEventListener('resize', () => {
+      const saved = loadPositions();
+      if (saved) applyPositions(saved);
+      else applyPositions(defaultPositions);
+      drawConnections();
+    });
+  </script>
+</body>
+</html>
