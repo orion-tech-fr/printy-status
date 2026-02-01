@@ -96,10 +96,13 @@
       align-items: center;
       gap: 0.6rem;
       z-index: 2;
-      cursor: grab;
+      cursor: default;
       transition: border-color 0.3s, box-shadow 0.3s;
       white-space: nowrap;
       user-select: none;
+    }
+    body.edit-mode .node {
+      cursor: grab;
     }
     .node:hover {
       border-color: #64748b;
@@ -217,10 +220,14 @@
       font-size: 0.6rem;
       fill: #475569;
       text-anchor: middle;
+      pointer-events: none;
+      cursor: default;
+    }
+    body.edit-mode .conn-label {
       pointer-events: all;
       cursor: grab;
     }
-    .conn-label:hover {
+    body.edit-mode .conn-label:hover {
       fill: #94a3b8;
     }
     .conn-label.dragging {
@@ -329,6 +336,7 @@
   <header>
     <div class="header-btns">
       <a href="index.html" class="hdr-btn">← Status</a>
+      <button class="hdr-btn" id="btn-edit" title="Editer les positions des elements">✏ Editer</button>
       <button class="hdr-btn" id="btn-simulate" title="Simuler un git push">▶ Simuler un commit</button>
     </div>
     <h1>Printy Architecture</h1>
@@ -350,6 +358,7 @@
     <div class="group-box" id="group-backend"><div class="group-label">Backend</div></div>
     <div class="group-box" id="group-local"><div class="group-label">Dev local</div></div>
     <div class="group-box" id="group-data"><div class="group-label">Persistance</div></div>
+    <div class="group-box" id="group-cloudflare"><div class="group-label">Cloudflare</div></div>
     <div class="group-box" id="group-github"><div class="group-label">GitHub</div></div>
 
     <!-- Nodes -->
@@ -415,12 +424,12 @@
 
     <div class="node cat-data" id="n-postgres">
       <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div>
-      <div class="node-text"><h3>PostgreSQL</h3><span>Railway Database</span></div>
+      <div class="node-text"><h3>PostgreSQL</h3><span>Railway DB | Prisma ORM</span></div>
     </div>
 
     <div class="node cat-data" id="n-r2">
       <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 110-14h.5"/><path d="M9.5 5a5.5 5.5 0 018 4.764A4.5 4.5 0 0118 19h-.5"/></svg></div>
-      <div class="node-text"><h3>Cloudflare R2</h3><span>Fichiers / STL / Avatars</span></div>
+      <div class="node-text"><h3>Cloudflare R2</h3><span>printy-files | S3-compatible</span></div>
     </div>
 
     <div class="node cat-monitor" id="n-status">
@@ -520,6 +529,26 @@
     }
 
 
+    // Edit mode
+    let editMode = false;
+
+    document.getElementById('btn-edit').addEventListener('click', () => {
+      editMode = !editMode;
+      document.body.classList.toggle('edit-mode', editMode);
+      const btn = document.getElementById('btn-edit');
+      if (editMode) {
+        btn.classList.add('active');
+        btn.textContent = '✏ Editer (ON)';
+        showToast('Mode edition active');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '✏ Editer';
+        savePositions();
+        saveLabelOffsets();
+        showToast('Positions sauvegardees');
+      }
+    });
+
     // Drag & Drop
     let dragNode = null;
     let dragOffsetX = 0;
@@ -527,7 +556,7 @@
 
     document.querySelectorAll('.node').forEach(node => {
       node.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
+        if (!editMode || e.button !== 0) return;
         e.preventDefault();
         dragNode = node;
         node.classList.add('dragging');
@@ -538,6 +567,7 @@
 
       // Touch support
       node.addEventListener('touchstart', (e) => {
+        if (!editMode) return;
         const touch = e.touches[0];
         dragNode = node;
         node.classList.add('dragging');
@@ -581,7 +611,6 @@
       dragNode.classList.remove('dragging');
       dragNode = null;
       savePositions();
-      showToast('Position sauvegardee');
     }
 
     // Label drag
@@ -590,6 +619,7 @@
     let labelDragStartY = 0;
 
     document.getElementById('svg-connections').addEventListener('mousedown', (e) => {
+      if (!editMode) return;
       const target = e.target;
       if (!target.classList.contains('conn-label')) return;
       e.preventDefault();
@@ -619,7 +649,6 @@
       saveLabelOffsets();
       dragLabel.classList.remove('dragging');
       dragLabel = null;
-      showToast('Label sauvegarde');
     });
 
     // Connections
@@ -869,7 +898,8 @@
       'group-frontend': { nodes: ['n-react', 'n-vercel', 'n-status'], padTop: 25, padBottom: 10 },
       'group-backend': { nodes: ['n-node', 'n-railway'], padTop: 25, padBottom: 10 },
       'group-local': { nodes: ['n-dev', 'n-local-react', 'n-local-node', 'n-local-db', 'n-local-status'], padTop: 15, padBottom: 20 },
-      'group-data': { nodes: ['n-postgres', 'n-r2'], padTop: 25, padBottom: 10 },
+      'group-data': { nodes: ['n-postgres'], padTop: 25, padBottom: 10 },
+      'group-cloudflare': { nodes: ['n-r2'], padTop: 25, padBottom: 10 },
       'group-github': { nodes: ['n-github', 'n-actions'], padTop: 25, padBottom: 10 },
     };
 
