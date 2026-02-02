@@ -718,8 +718,8 @@
       <div class="service" id="service-database">
         <div class="service-header">
           <div class="service-info">
-            <h2>Database</h2>
-            <a href="https://railway.com/dashboard" target="_blank" class="service-url service-url-link">Railway PostgreSQL</a>
+            <h2>Railway PostgreSQL</h2>
+            <a href="https://railway.com/dashboard" target="_blank" class="service-url service-url-link">printy-api-production.up.railway.app</a>
           </div>
           <div class="status checking" id="status-database">
             <span class="status-dot"></span>
@@ -734,6 +734,14 @@
           <div class="detail-row">
             <span class="detail-label">Reponse</span>
             <span id="database-response-time">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Stockage</span>
+            <span id="database-storage">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Offre</span>
+            <span id="database-plan" style="font-size: 0.8rem;">Railway Trial · 1 GB max</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Migration</span>
@@ -853,6 +861,10 @@
           <div class="detail-row">
             <span class="detail-label">Stockage</span>
             <span id="r2-storage-size">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Offre</span>
+            <span style="font-size: 0.8rem;">Cloudflare Free · 10 GB max</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Fichiers</span>
@@ -1301,6 +1313,17 @@
                     .join('');
                 }
 
+                // Taille de la base de donnees
+                const storageEl = document.getElementById('database-storage');
+                if (schema.databaseSize) {
+                  const used = formatBytes(schema.databaseSize);
+                  const maxBytes = 1 * 1024 * 1024 * 1024; // 1 GB
+                  const pct = ((schema.databaseSize / maxBytes) * 100).toFixed(1);
+                  storageEl.innerHTML = `${used} <span style="color: #64748b; font-size: 0.8rem;">/ 1 GB (${pct}%)</span>`;
+                } else {
+                  storageEl.textContent = 'N/A';
+                }
+
                 // Activite recente
                 if (schema.recentActivity && schema.recentActivity.length > 0) {
                   const activityEl = document.getElementById('database-recent-activity');
@@ -1500,7 +1523,9 @@
 
         if (response.ok && data.success) {
           const s = data.stats;
-          storageSizeEl.textContent = formatBytes(s.totalSize);
+          const r2MaxBytes = 10 * 1024 * 1024 * 1024; // 10 GB
+          const r2Pct = ((s.totalSize / r2MaxBytes) * 100).toFixed(1);
+          storageSizeEl.innerHTML = `${formatBytes(s.totalSize)} <span style="color: #64748b; font-size: 0.8rem;">/ 10 GB (${r2Pct}%)</span>`;
           totalFilesEl.textContent = s.totalCount;
 
           const types = [
