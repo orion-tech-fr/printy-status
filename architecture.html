@@ -16,10 +16,11 @@
 
     header {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
+      gap: 0.75rem;
       padding: 0.8rem 1rem;
+      flex-wrap: wrap;
     }
 
     h1 { font-size: 1.5rem; font-weight: 600; white-space: nowrap; }
@@ -346,13 +347,11 @@
 </head>
 <body>
   <header>
-    <div class="header-btns">
-      <a href="index.html" class="hdr-btn">← Status</a>
-      <button class="hdr-btn" id="btn-edit" title="Editer les positions des elements">✏ Editer</button>
-      <button class="hdr-btn" id="btn-simulate" title="Simuler un git push">▶ Commit</button>
-      <button class="hdr-btn" id="btn-sim-client" title="Simuler une consultation client">▶ Client</button>
-    </div>
+    <a href="index.html" class="hdr-btn">← Status</a>
     <h1>Printy Architecture</h1>
+    <button class="hdr-btn" id="btn-edit" title="Editer les positions des elements">✏ Editer</button>
+    <button class="hdr-btn" id="btn-simulate" title="Simuler un git push">▶ Commit</button>
+    <button class="hdr-btn" id="btn-sim-client" title="Simuler une consultation client">▶ Client</button>
   </header>
 
   <div class="legend">
