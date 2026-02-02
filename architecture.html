@@ -32,12 +32,13 @@
     }
 
     .diagram-wrapper {
-      width: 100%;
+      width: calc(100% - 2rem);
+      margin: 1rem auto 0;
       overflow: hidden;
-      margin-top: 0.5rem;
       border: 1px solid rgba(51, 65, 85, 0.4);
       border-radius: 12px;
       background: rgba(15, 23, 42, 0.5);
+      padding: 0.75rem 0 0.5rem;
     }
 
     .hdr-btn {
@@ -992,9 +993,27 @@
       const wrapper = document.getElementById('diagram-wrapper');
       const diagram = document.getElementById('diagram');
       const availableWidth = wrapper.clientWidth;
-      currentScale = Math.min(1, availableWidth / 1100);
-      diagram.style.transform = `scale(${currentScale})`;
-      wrapper.style.height = `${700 * currentScale}px`;
+
+      // Calculer les bords reels des noeuds
+      let minX = Infinity, maxX = 0;
+      document.querySelectorAll('.node').forEach(n => {
+        const left = n.offsetLeft;
+        const right = left + n.offsetWidth;
+        if (left < minX) minX = left;
+        if (right > maxX) maxX = right;
+      });
+
+      // Marge autour du contenu
+      const pad = 15;
+      minX = Math.max(0, minX - pad);
+      maxX = maxX + pad;
+      const contentWidth = maxX - minX;
+
+      // Scale sur la largeur du contenu reel (pas les 1100px)
+      currentScale = Math.min(1, availableWidth / contentWidth);
+      const offsetX = (availableWidth - contentWidth * currentScale) / 2 - minX * currentScale;
+      diagram.style.transform = `translate(${offsetX}px, 0) scale(${currentScale})`;
+      wrapper.style.height = `${700 * currentScale + 16}px`;
     }
 
     // Init
