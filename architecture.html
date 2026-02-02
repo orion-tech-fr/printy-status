@@ -477,6 +477,8 @@
     localStorage.removeItem('printy-arch-positions-v5');
     localStorage.removeItem('printy-arch-label-offsets-v5');
 
+    const API_BASE = 'https://printy-api-production.up.railway.app/api';
+
     function loadLabelOffsets() {
       try {
         const saved = localStorage.getItem(LABEL_STORAGE_KEY);
@@ -487,6 +489,11 @@
 
     function saveLabelOffsets() {
       localStorage.setItem(LABEL_STORAGE_KEY, JSON.stringify(labelOffsets));
+      // Sync vers API
+      fetch(`${API_BASE}/config/arch-label-offsets`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(labelOffsets),
+      }).catch(() => {});
     }
 
     let labelOffsets = loadLabelOffsets();
@@ -511,6 +518,11 @@
         };
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
+      // Sync vers API
+      fetch(`${API_BASE}/config/arch-positions`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(positions),
+      }).catch(() => {});
     }
 
     function applyPositions(positions) {
@@ -533,10 +545,32 @@
       setTimeout(() => toast.classList.remove('show'), 1500);
     }
 
-    // Init positions
-    function initPositions() {
-      const saved = loadPositions();
-      applyPositions(saved || defaultPositions);
+    // Init positions - charge depuis API, sinon localStorage, sinon defauts
+    async function initPositions() {
+      // D'abord appliquer localStorage ou defauts (instantane)
+      const local = loadPositions();
+      applyPositions(local || defaultPositions);
+      drawConnections();
+
+      // Puis tenter de charger depuis l'API (positions partagees)
+      try {
+        const [posRes, labelRes] = await Promise.all([
+          fetch(`${API_BASE}/config/arch-positions`).then(r => r.json()),
+          fetch(`${API_BASE}/config/arch-label-offsets`).then(r => r.json()),
+        ]);
+        if (posRes.success && posRes.data) {
+          applyPositions(posRes.data);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(posRes.data));
+          drawConnections();
+        }
+        if (labelRes.success && labelRes.data) {
+          labelOffsets = labelRes.data;
+          localStorage.setItem(LABEL_STORAGE_KEY, JSON.stringify(labelRes.data));
+          drawConnections();
+        }
+      } catch {
+        // API indisponible, on garde le local
+      }
     }
 
 
@@ -958,7 +992,6 @@
 
     // Init
     initPositions();
-    drawConnections();
     scaleDiagram();
 
     window.addEventListener('resize', () => {
