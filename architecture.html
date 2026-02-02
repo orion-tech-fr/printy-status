@@ -679,11 +679,11 @@
       /* 11 */ { from: 'n-dev', to: 'n-local-node', color: '#0ea5e9', label: 'npm run dev' },
       /* 12 */ { from: 'n-local-node', to: 'n-local-db', color: '#0ea5e9', label: 'Prisma SQLite' },
       /* 13 */ { from: 'n-local-react', to: 'n-local-node', color: '#0ea5e9', label: 'proxy API' },
-      /* 14 */ { from: 'n-status', to: 'n-node', color: '#ec4899', label: 'health API' },
-      /* 15 */ { from: 'n-status', to: 'n-react', color: '#ec4899', label: 'health front' },
-      /* 16 */ { from: 'n-status', to: 'n-actions', color: '#ec4899', label: 'CI status' },
-      /* 17 */ { from: 'n-status', to: 'n-postgres', color: '#ec4899', label: 'health DB' },
-      /* 18 */ { from: 'n-status', to: 'n-medias', color: '#ec4899', label: 'health R2' },
+      /* 14 */ { from: 'n-node', to: 'n-status', color: '#ec4899', label: 'health API' },
+      /* 15 */ { from: 'n-react', to: 'n-status', color: '#ec4899', label: 'health front' },
+      /* 16 */ { from: 'n-actions', to: 'n-status', color: '#ec4899', label: 'CI status' },
+      /* 17 */ { from: 'n-postgres', to: 'n-status', color: '#ec4899', label: 'health DB' },
+      /* 18 */ { from: 'n-medias', to: 'n-status', color: '#ec4899', label: 'health R2' },
       /* 19 */ { from: 'n-dev', to: 'n-local-status', color: '#0ea5e9', label: 'ouvre HTML' },
       /* 20 */ { from: 'n-dev', to: 'n-local-git', color: '#0ea5e9', label: 'git commit' },
     ];
@@ -808,11 +808,11 @@
       { conn: 9,  nodes: ['n-node', 'n-medias'],         label: 'Backend genere l\'URL presignee via R2' },
       { conn: 7,  nodes: ['n-react', 'n-medias'],        label: 'Frontend upload directement vers R2' },
       { conn: 8,  nodes: ['n-medias', 'n-react'],        label: 'Frontend telecharge directement depuis R2' },
-      { conn: 14, nodes: ['n-status', 'n-node'],     label: 'Printy Status monitore le backend' },
-      { conn: 15, nodes: ['n-status', 'n-react'],    label: 'Printy Status monitore le frontend' },
-      { conn: 17, nodes: ['n-status', 'n-postgres'], label: 'Printy Status monitore la base de donnees' },
-      { conn: 18, nodes: ['n-status', 'n-medias'],       label: 'Printy Status monitore le stockage R2' },
-      { conn: 16, nodes: ['n-status', 'n-actions'],  label: 'Printy Status verifie la CI' },
+      { conn: 14, nodes: ['n-node', 'n-status'],     label: 'Backend repond au monitoring' },
+      { conn: 15, nodes: ['n-react', 'n-status'],    label: 'Frontend repond au monitoring' },
+      { conn: 17, nodes: ['n-postgres', 'n-status'], label: 'BDD repond au monitoring' },
+      { conn: 18, nodes: ['n-medias', 'n-status'],       label: 'R2 repond au monitoring' },
+      { conn: 16, nodes: ['n-actions', 'n-status'],  label: 'CI repond au monitoring' },
     ];
 
     let simRunning = false;
