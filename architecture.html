@@ -843,6 +843,7 @@
       { conn: 1,  nodes: ['n-github', 'n-actions'],    label: 'GitHub declenche les GitHub Actions' },
       { conn: 2,  nodes: ['n-actions', 'n-react'],     label: 'GitHub Actions deploie le frontend sur Vercel' },
       { conn: 3,  nodes: ['n-actions', 'n-node'],      label: 'GitHub Actions deploie le backend sur Railway' },
+      { conn: 6,  nodes: ['n-node', 'n-postgres'],     label: 'Si migration : Prisma applique les changements sur PostgreSQL' },
     ];
 
     const simClientSteps = [
