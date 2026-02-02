@@ -393,7 +393,7 @@
 
     <div class="node cat-local" id="n-local-git">
       <div class="node-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M21.62 11.108l-8.731-8.729a1.292 1.292 0 00-1.823 0L9.257 4.19l2.299 2.3a1.532 1.532 0 011.939 1.95l2.214 2.217a1.532 1.532 0 011.583 2.6 1.536 1.536 0 01-2.119-.363 1.534 1.534 0 01-.212-1.248L12.87 9.454v5.48a1.535 1.535 0 01-.666 2.898 1.536 1.536 0 01-.404-3.017V9.334a1.535 1.535 0 01-.832-2.012l-2.266-2.265-5.98 5.982a1.292 1.292 0 000 1.824l8.731 8.729a1.292 1.292 0 001.823 0l8.344-8.345a1.292 1.292 0 000-1.824z"/></svg></div>
-      <div class="node-text"><h3>Git (local)</h3><span>Repo local</span></div>
+      <div class="node-text"><h3>Git</h3><span>Repos locaux</span></div>
     </div>
 
     <div class="node cat-git" id="n-github">
@@ -798,7 +798,7 @@
     // Simulation
     const simSteps = [
       { conn: 20, nodes: ['n-dev', 'n-local-git'],     label: 'Developpeur commit le code en local' },
-      { conn: 0,  nodes: ['n-local-git', 'n-github'],  label: 'Git local push le code vers GitHub' },
+      { conn: 0,  nodes: ['n-local-git', 'n-github'],  label: 'Git push le code vers GitHub' },
       { conn: 1,  nodes: ['n-github', 'n-actions'],  label: 'GitHub declenche les GitHub Actions' },
       { conn: 2,  nodes: ['n-actions', 'n-react'],   label: 'GitHub Actions deploie le frontend sur Vercel' },
       { conn: 3,  nodes: ['n-actions', 'n-node'],    label: 'GitHub Actions deploie le backend sur Railway' },
