@@ -1656,26 +1656,34 @@
 
           if (u.isTrial) {
             // Mode Trial
-            const limitStr = u.usageLimit != null ? (u.usageLimit / 100).toFixed(2) : '5.00';
-            planEl.textContent = `Railway Trial · $${limitStr} credit`;
+            const limitDollars = u.hardLimit != null ? (u.hardLimit / 100).toFixed(2)
+              : u.softLimit != null ? (u.softLimit / 100).toFixed(2) : '5.00';
+            planEl.textContent = `Railway Trial · $${limitDollars} credit`;
 
-            // Jours restants (billingEnd = fin du trial)
-            if (u.billingEnd) {
-              const end = new Date(u.billingEnd);
-              const now = new Date();
-              const daysLeft = Math.ceil((end - now) / 86400000);
+            // Jours restants (trialDaysRemaining de l'API)
+            const daysLeft = u.trialDaysRemaining;
+            if (daysLeft != null && u.accountCreatedAt) {
+              const created = new Date(u.accountCreatedAt);
+              const createdStr = created.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-              if (u.accountCreatedAt) {
-                const created = new Date(u.accountCreatedAt);
-                const createdStr = created.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              if (u.billingEnd) {
+                const end = new Date(u.billingEnd);
                 const endStr = end.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
                 if (daysLeft <= 0) {
-                  subEl.innerHTML = `${createdStr} <span style="color: #ef4444; font-weight: 600;">· Trial expire !</span>`;
+                  subEl.innerHTML = `${createdStr} <span style="color: #ef4444; font-weight: 600;">· Trial expiré !</span>`;
                 } else if (daysLeft <= 3) {
                   subEl.innerHTML = `${createdStr} <span style="color: #f59e0b; font-weight: 600;">· ${daysLeft}j restants (fin ${endStr})</span>`;
                 } else {
                   subEl.innerHTML = `${createdStr} <span style="color: #64748b;">· ${daysLeft}j restants (fin ${endStr})</span>`;
+                }
+              } else {
+                if (daysLeft <= 0) {
+                  subEl.innerHTML = `${createdStr} <span style="color: #ef4444; font-weight: 600;">· Trial expiré !</span>`;
+                } else if (daysLeft <= 3) {
+                  subEl.innerHTML = `${createdStr} <span style="color: #f59e0b; font-weight: 600;">· ${daysLeft}j restants</span>`;
+                } else {
+                  subEl.innerHTML = `${createdStr} <span style="color: #64748b;">· ${daysLeft}j restants</span>`;
                 }
               }
 
@@ -1685,24 +1693,27 @@
               }
             }
 
-            // Credit restant (pct inverse : 10% restant = danger)
-            if (u.creditBalance != null && u.usageLimit != null) {
-              const creditStr = (u.creditBalance / 100).toFixed(2);
-              const pctRemaining = (u.creditBalance / u.usageLimit) * 100;
-              const pctUsed = 100 - pctRemaining;
-              const creditColor = usageColor(pctUsed);
-              usageEl.innerHTML = `<span style="color: ${creditColor}">$${creditStr}</span><span style="color: #64748b"> / $${limitStr} credit restant (${pctRemaining.toFixed(0)}%)</span>`;
+            // Credit restant
+            if (u.creditBalance != null) {
+              const creditStr = u.creditBalance.toFixed(2);
+              const limitCents = u.hardLimit || u.softLimit || 500;
+              const creditCents = u.creditBalance * 100;
+              const pctUsed = ((limitCents - creditCents) / limitCents) * 100;
+              const creditColor = usageColor(Math.max(0, pctUsed));
+              usageEl.innerHTML = `<span style="color: ${creditColor}">$${creditStr}</span><span style="color: #64748b"> / $${limitDollars} credit restant</span>`;
+            } else if (u.currentUsage != null) {
+              usageEl.textContent = `$${u.currentUsage.toFixed(2)} consommé`;
             } else {
               usageEl.textContent = '-';
             }
           } else {
             // Mode Hobby ($5/mois)
-            planEl.textContent = 'Railway Hobby · $5/mois';
+            planEl.textContent = `Railway ${u.plan || 'Hobby'} · $5/mois`;
 
             // Consommation du mois
-            if (u.monthlyUsage != null) {
-              const usedStr = (u.monthlyUsage / 100).toFixed(2);
-              const hobbyPct = (u.monthlyUsage / 500) * 100; // $5.00 = 500 cents
+            if (u.currentUsage != null) {
+              const usedStr = u.currentUsage.toFixed(2);
+              const hobbyPct = (u.currentUsage / 5) * 100;
               const hobbyColor = usageColor(hobbyPct);
               usageEl.innerHTML = `<span style="color: ${hobbyColor}">$${usedStr}</span><span style="color: #64748b"> / $5.00 ce mois (${hobbyPct.toFixed(0)}%)</span>`;
             } else {
@@ -1718,10 +1729,12 @@
               if (u.accountCreatedAt) {
                 const created = new Date(u.accountCreatedAt);
                 const createdStr = created.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                subEl.innerHTML = `${createdStr} <span style="color: #64748b;">· Periode ${startStr} - ${endStr}</span>`;
+                subEl.innerHTML = `${createdStr} <span style="color: #64748b;">· Période ${startStr} - ${endStr}</span>`;
               }
             }
           }
+        } else if (data.error) {
+          usageEl.innerHTML = `<span style="color: #f59e0b; font-size: 0.75rem;">${data.error}</span>`;
         } else {
           usageEl.textContent = 'N/A';
         }
