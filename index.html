@@ -624,7 +624,6 @@
         <div id="in-progress" style="display: none;"></div>
         <a href="architecture.html" style="background:#1e293b;color:#3b82f6;border:1px solid #334155;padding:0.3rem 0.7rem;border-radius:6px;font-size:0.8rem;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'">Architecture</a>
       </div>
-      <div id="status-usage" style="font-size: 0.72rem; color: #64748b; display: none; text-align: center; margin-top: 0.3rem;"></div>
     </header>
 
     <div class="services" id="services">
@@ -1612,15 +1611,6 @@
           }
         });
 
-        // Afficher l'usage printy-status en haut
-        const statusRepo = u.repos.find(r => r.name === 'status');
-        const statusUsageEl = document.getElementById('status-usage');
-        if (statusUsageEl) {
-          const stMin = statusRepo ? statusRepo.minutes : 0;
-          const stRuns = statusRepo ? statusRepo.runs : 0;
-          statusUsageEl.innerHTML = `CI printy-status : ${stMin} min (${stRuns} runs) · Cumul total : <span style="color: ${totalColor}">${u.totalMinutes}</span> / ${u.includedMinutes} min/mois`;
-          statusUsageEl.style.display = 'block';
-        }
       } catch {
         // Silencieux si erreur
       }
