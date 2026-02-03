@@ -1615,8 +1615,10 @@
         // Afficher l'usage printy-status en haut
         const statusRepo = u.repos.find(r => r.name === 'status');
         const statusUsageEl = document.getElementById('status-usage');
-        if (statusRepo && statusUsageEl) {
-          statusUsageEl.innerHTML = `CI printy-status : ${statusRepo.minutes} min (${statusRepo.runs} runs)`;
+        if (statusUsageEl) {
+          const stMin = statusRepo ? statusRepo.minutes : 0;
+          const stRuns = statusRepo ? statusRepo.runs : 0;
+          statusUsageEl.innerHTML = `CI printy-status : ${stMin} min (${stRuns} runs) · Cumul total : <span style="color: ${totalColor}">${u.totalMinutes}</span> / ${u.includedMinutes} min/mois`;
           statusUsageEl.style.display = 'block';
         }
       } catch {
