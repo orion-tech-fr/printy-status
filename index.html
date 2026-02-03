@@ -562,8 +562,9 @@
         max-width: calc(100vw - 5rem);
       }
       .header-row {
-        flex-direction: column;
-        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem;
       }
       h1 {
         font-size: 1.3rem;
@@ -623,6 +624,7 @@
         <div id="in-progress" style="display: none;"></div>
         <a href="architecture.html" style="background:#1e293b;color:#3b82f6;border:1px solid #334155;padding:0.3rem 0.7rem;border-radius:6px;font-size:0.8rem;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'">Architecture</a>
       </div>
+      <div id="status-usage" style="font-size: 0.72rem; color: #64748b; display: none; text-align: center; margin-top: 0.3rem;"></div>
     </header>
 
     <div class="services" id="services">
@@ -1602,12 +1604,21 @@
         const totalPct = u.includedMinutes > 0 ? (u.totalMinutes / u.includedMinutes) * 100 : 0;
         const totalColor = usageColor(totalPct);
 
+        // Afficher usage de chaque repo dans sa carte CI
         u.repos.forEach(r => {
           const el = document.getElementById(`ci-${r.name}-usage`);
           if (el) {
             el.innerHTML = `<span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span><br><span style="color: #64748b; font-size: 0.75rem;">Cumul </span><span style="color: ${totalColor}; font-size: 0.75rem;">${u.totalMinutes}</span><span style="color: #64748b; font-size: 0.75rem;"> / ${u.includedMinutes} min/mois (${u.percentUsed}%)</span>`;
           }
         });
+
+        // Afficher l'usage printy-status en haut
+        const statusRepo = u.repos.find(r => r.name === 'status');
+        const statusUsageEl = document.getElementById('status-usage');
+        if (statusRepo && statusUsageEl) {
+          statusUsageEl.innerHTML = `CI printy-status : ${statusRepo.minutes} min (${statusRepo.runs} runs)`;
+          statusUsageEl.style.display = 'block';
+        }
       } catch {
         // Silencieux si erreur
       }
