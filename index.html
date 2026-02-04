@@ -239,6 +239,29 @@
       gap: 0.5rem;
     }
 
+    .ci-usage-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.15rem 0.5rem;
+    }
+    .ci-usage-item {
+      text-align: right;
+    }
+    .ci-usage-sep {
+      color: #475569;
+      font-size: 0.75rem;
+    }
+    @media (max-width: 900px) {
+      .ci-usage-sep { display: none; }
+      .ci-usage-wrap {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.1rem;
+      }
+    }
+
     .detail-label {
       color: #64748b;
       flex-shrink: 0;
@@ -780,16 +803,16 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Type</span>
-            <span>CircleCI</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date</span>
-            <span><span class="detail-value" id="ci-backend-date">-</span> · <span class="uptime-value" id="ci-backend-uptime"></span></span>
+            <span class="detail-label">Offre</span>
+            <span style="font-size: 0.8rem;">CircleCI Free · 30 000 crédits/mois (~50h)</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Usage</span>
             <span class="detail-value" id="ci-backend-usage" style="font-size: 0.85rem;">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date</span>
+            <span><span class="detail-value" id="ci-backend-date">-</span> · <span class="uptime-value" id="ci-backend-uptime"></span></span>
           </div>
           <div class="detail-row commit-row">
             <span class="detail-label">Commit <span class="sha-value" id="ci-backend-sha"></span></span>
@@ -819,16 +842,16 @@
         </div>
         <div class="service-details">
           <div class="detail-row">
-            <span class="detail-label">Type</span>
-            <span>CircleCI</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Date</span>
-            <span><span class="detail-value" id="ci-frontend-date">-</span> · <span class="uptime-value" id="ci-frontend-uptime"></span></span>
+            <span class="detail-label">Offre</span>
+            <span style="font-size: 0.8rem;">CircleCI Free · 30 000 crédits/mois (~50h)</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Usage</span>
             <span class="detail-value" id="ci-frontend-usage" style="font-size: 0.85rem;">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date</span>
+            <span><span class="detail-value" id="ci-frontend-date">-</span> · <span class="uptime-value" id="ci-frontend-uptime"></span></span>
           </div>
           <div class="detail-row commit-row">
             <span class="detail-label">Commit <span class="sha-value" id="ci-frontend-sha"></span></span>
@@ -1605,7 +1628,7 @@
             const remainingH = Math.floor(remainingMin / 60);
             const remainingM = Math.round(remainingMin % 60);
             const remainingStr = remainingH > 0 ? `${remainingH}h${remainingM > 0 ? remainingM + 'min' : ''}` : `${remainingM}min`;
-            el.innerHTML = `<span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span><br><span style="color: #64748b; font-size: 0.75rem;">Cumul ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalEstimatedCredits} / 30 000 crédits/mois (${creditPct}%)</span><br><span style="color: #64748b; font-size: 0.75rem;">Reste ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${remainingStr} de CI ce mois</span>`;
+            el.innerHTML = `<span class="ci-usage-wrap"><span class="ci-usage-item"><span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Cumul </span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalEstimatedCredits} / 30 000 crédits /mois (${creditPct}%)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Reste ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${remainingStr} /mois</span></span></span>`;
           }
         });
 
