@@ -640,11 +640,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Date</span>
-            <span class="detail-value" id="api-deploy-date">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Uptime</span>
-            <span class="detail-value uptime-value" id="api-uptime">-</span>
+            <span><span class="detail-value" id="api-deploy-date">-</span> · <span class="uptime-value" id="api-uptime">-</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Offre</span>
@@ -699,11 +695,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Date</span>
-            <span class="detail-value" id="frontend-deploy-date">-</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Uptime</span>
-            <span class="detail-value uptime-value" id="frontend-uptime">-</span>
+            <span><span class="detail-value" id="frontend-deploy-date">-</span> · <span class="uptime-value" id="frontend-uptime">-</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Offre</span>
@@ -793,7 +785,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Date</span>
-            <span class="detail-value" id="ci-backend-date">-</span> <span style="color: #64748b; font-size: 0.8rem;" id="ci-backend-uptime"></span>
+            <span><span class="detail-value" id="ci-backend-date">-</span> · <span class="uptime-value" id="ci-backend-uptime"></span></span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Usage</span>
@@ -832,7 +824,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Date</span>
-            <span class="detail-value" id="ci-frontend-date">-</span> <span style="color: #64748b; font-size: 0.8rem;" id="ci-frontend-uptime"></span>
+            <span><span class="detail-value" id="ci-frontend-date">-</span> · <span class="uptime-value" id="ci-frontend-uptime"></span></span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Usage</span>
@@ -981,14 +973,9 @@
 
     function formatDeployDate(dateStr) {
       if (!dateStr) return '-';
-      const date = new Date(dateStr);
-      return date.toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const d = new Date(dateStr);
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function updateUptimeDisplays() {
@@ -1005,7 +992,7 @@
         const uptimeEl = document.getElementById(`${id}-uptime`);
         if (pushTime && uptimeEl) {
           const elapsed = Date.now() - pushTime;
-          uptimeEl.textContent = 'il y a ' + formatUptime(elapsed);
+          uptimeEl.textContent = formatUptime(elapsed);
         }
       });
     }
@@ -1148,13 +1135,9 @@
 
     function formatDate(dateStr) {
       if (!dateStr) return '-';
-      const date = new Date(dateStr);
-      return date.toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const d = new Date(dateStr);
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
     function updateCIStatus(id, pipeline) {
@@ -1176,8 +1159,7 @@
         }
         updateUptimeDisplays();
       }
-      const commitDateStr = pipeline.commitDate ? formatDate(pipeline.commitDate) : '';
-      shaEl.innerHTML = (pipeline.commitSha || '-') + (commitDateStr ? ` <span style="color: #64748b; font-size: 0.8rem;">${commitDateStr}</span>` : '');
+      shaEl.textContent = pipeline.commitSha || '-';
       commitEl.textContent = pipeline.commit || '-';
       commitEl.title = pipeline.commit || '';
 
