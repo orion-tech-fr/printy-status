@@ -1601,7 +1601,11 @@
             const totalEstimatedCredits = Math.round(u.totalMinutes * 10);
             const creditPct = (totalEstimatedCredits / 30000 * 100).toFixed(1);
             const creditColor = usageColor(parseFloat(creditPct));
-            el.innerHTML = `<span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span><br><span style="color: #64748b; font-size: 0.75rem;">Cumul ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalEstimatedCredits} / 30 000 credits (${creditPct}%)</span>`;
+            const remainingMin = Math.max(0, (30000 - totalEstimatedCredits) / 10);
+            const remainingH = Math.floor(remainingMin / 60);
+            const remainingM = Math.round(remainingMin % 60);
+            const remainingStr = remainingH > 0 ? `${remainingH}h${remainingM > 0 ? remainingM + 'min' : ''}` : `${remainingM}min`;
+            el.innerHTML = `<span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span><br><span style="color: #64748b; font-size: 0.75rem;">Cumul ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalEstimatedCredits} / 30 000 crédits/mois (${creditPct}%)</span><br><span style="color: #64748b; font-size: 0.75rem;">Reste ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${remainingStr} de CI ce mois</span>`;
           }
         });
 
