@@ -1152,8 +1152,8 @@
 
     // Jobs attendus par pipeline
     const expectedJobs = {
-      'ci-backend': ['unit-tests', 'integration-tests', 'build', 'security-audit', 'deploy'],
-      'ci-frontend': ['unit-tests', 'build', 'security-audit', 'deploy'],
+      'ci-backend': ['unit-tests', 'integration-tests', 'build', 'security-audit', 'deploy (push vers branche production)'],
+      'ci-frontend': ['unit-tests', 'build', 'security-audit', 'deploy (declenche deploy Vercel)'],
     };
 
     function formatDate(dateStr) {
@@ -1805,7 +1805,7 @@
       if (lastCIData) {
         const frontendPipeline = lastCIData.find(p => p.name === 'frontend');
         if (frontendPipeline) {
-          const deployJob = (frontendPipeline.jobs || []).find(j => j.name === 'deploy');
+          const deployJob = (frontendPipeline.jobs || []).find(j => j.name.startsWith('deploy'));
           if (deployJob && (deployJob.status === 'in_progress' || deployJob.status === 'queued')) {
             frontendDeployResult.inProgress = true;
             frontendDeployResult.status = 'deploying';
@@ -1816,7 +1816,7 @@
         }
         const backendPipeline = lastCIData.find(p => p.name === 'backend');
         if (backendPipeline) {
-          const deployJob = (backendPipeline.jobs || []).find(j => j.name === 'deploy');
+          const deployJob = (backendPipeline.jobs || []).find(j => j.name.startsWith('deploy'));
           if (deployJob && (deployJob.status === 'in_progress' || deployJob.status === 'queued')) {
             backendDeployResult.inProgress = true;
             backendDeployResult.status = 'deploying';
