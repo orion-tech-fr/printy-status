@@ -1620,15 +1620,17 @@
         u.repos.forEach(r => {
           const el = document.getElementById(`ci-${r.name}-usage`);
           if (el) {
-            const estimatedCredits = Math.round(r.minutes * 10);
-            const totalEstimatedCredits = Math.round(u.totalMinutes * 10);
-            const creditPct = (totalEstimatedCredits / 30000 * 100).toFixed(1);
+            const repoCredits = r.credits || 0;
+            const totalCredits = u.creditsUsed || 0;
+            const includedCredits = u.includedCredits || 30000;
+            const creditPct = ((totalCredits / includedCredits) * 100).toFixed(1);
             const creditColor = usageColor(parseFloat(creditPct));
-            const remainingMin = Math.max(0, (30000 - totalEstimatedCredits) / 10);
+            const remainingCredits = Math.max(0, includedCredits - totalCredits);
+            const remainingMin = Math.round(remainingCredits / 10);
             const remainingH = Math.floor(remainingMin / 60);
             const remainingM = Math.round(remainingMin % 60);
             const remainingStr = remainingH > 0 ? `${remainingH}h${remainingM > 0 ? remainingM + 'min' : ''}` : `${remainingM}min`;
-            el.innerHTML = `<span class="ci-usage-wrap"><span class="ci-usage-item"><span style="color: #e2e8f0">${r.minutes} min</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Cumul </span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalEstimatedCredits} / 30 000 crédits /mois (${creditPct}%)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Reste ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${remainingStr} /mois</span></span></span>`;
+            el.innerHTML = `<span class="ci-usage-wrap"><span class="ci-usage-item"><span style="color: #e2e8f0">${repoCredits} crédits</span> <span style="color: #64748b; font-size: 0.75rem;">(${r.runs} runs)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Cumul </span><span style="color: ${creditColor}; font-size: 0.75rem;">${totalCredits.toLocaleString()} / ${includedCredits.toLocaleString()} crédits (${creditPct}%)</span></span><span class="ci-usage-sep">·</span><span class="ci-usage-item"><span style="color: #64748b; font-size: 0.75rem;">Reste ~</span><span style="color: ${creditColor}; font-size: 0.75rem;">${remainingStr}</span></span></span>`;
           }
         });
 
